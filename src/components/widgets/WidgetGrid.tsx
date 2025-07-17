@@ -59,10 +59,33 @@ export const WidgetGrid: React.FC<WidgetGridProps> = ({
     const currentWidgetIds = widgets.map(w => w.id);
     Object.keys(widgetRefs.current).forEach(id => {
       if (!currentWidgetIds.includes(id)) {
+        // Stop animations before cleanup
+        const refs = widgetRefs.current[id];
+        if (refs) {
+          refs.translateX.stopAnimation();
+          refs.translateY.stopAnimation();
+          refs.scale.stopAnimation();
+          refs.opacity.stopAnimation();
+        }
         delete widgetRefs.current[id];
       }
     });
   }, [widgets]);
+
+  // Cleanup effect to prevent memory leaks
+  useEffect(() => {
+    return () => {
+      // Stop all animations when component unmounts
+      Object.values(widgetRefs.current).forEach(refs => {
+        if (refs) {
+          refs.translateX.stopAnimation();
+          refs.translateY.stopAnimation();
+          refs.scale.stopAnimation();
+          refs.opacity.stopAnimation();
+        }
+      });
+    };
+  }, []);
 
   const snapToGrid = (value: number): number => {
     return Math.round(value / (WIDGET_SIZE + spacing.sm)) * (WIDGET_SIZE + spacing.sm);
@@ -112,6 +135,10 @@ export const WidgetGrid: React.FC<WidgetGridProps> = ({
       onMoveShouldSetPanResponder: () => editable,
       onPanResponderGrant: () => {
         setDraggedWidget(widget.id);
+        // Stop any existing animations
+        scale.stopAnimation();
+        opacity.stopAnimation();
+        
         Animated.parallel([
           Animated.spring(scale, {
             toValue: 1.1,
@@ -130,6 +157,12 @@ export const WidgetGrid: React.FC<WidgetGridProps> = ({
       onPanResponderRelease: (evt, gestureState) => {
         const newX = snapToGrid(widget.position.x + gestureState.dx);
         const newY = snapToGrid(widget.position.y + gestureState.dy);
+
+        // Stop any existing animations
+        translateX.stopAnimation();
+        translateY.stopAnimation();
+        scale.stopAnimation();
+        opacity.stopAnimation();
 
         if (isValidPosition(newX, newY, widget.size.width, widget.size.height, widget.id)) {
           // Valid position - animate to snapped position
@@ -150,8 +183,10 @@ export const WidgetGrid: React.FC<WidgetGridProps> = ({
               toValue: 1,
               useNativeDriver: true,
             }),
-          ]).start(() => {
-            onWidgetMove?.(widget.id, { x: newX, y: newY });
+          ]).start((finished) => {
+            if (finished) {
+              onWidgetMove?.(widget.id, { x: newX, y: newY });
+            }
           });
         } else {
           // Invalid position - animate back to original
@@ -262,7 +297,13 @@ const ClockWidget: React.FC = () => {
 
   React.useEffect(() => {
     const interval = setInterval(() => setTime(new Date()), 1000);
-    return () => clearInterval(interval);
+    return () => {
+      try {
+        clearInterval(interval);
+      } catch (error) {
+        // Ignore cleanup errors
+      }
+    };
   }, []);
 
   return (

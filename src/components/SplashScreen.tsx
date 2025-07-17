@@ -23,8 +23,12 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish }) => {
   const progressWidth = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
+    let timeoutId: NodeJS.Timeout | null = null;
+    let animationSequenceRef: Animated.CompositeAnimation | null = null;
+    let circleAnimations: Animated.CompositeAnimation[] = [];
+
     // Start the splash animation sequence
-    const animationSequence = Animated.sequence([
+    animationSequenceRef = Animated.sequence([
       // Background fade in
       Animated.timing(backgroundOpacity, {
         toValue: 1,
@@ -110,9 +114,9 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish }) => {
       Animated.delay(500),
     ]);
 
-    // Start continuous circle rotation
+    // Start continuous circle rotation with proper cleanup tracking
     const rotateCircles = () => {
-      Animated.loop(
+      const circle1Animation = Animated.loop(
         Animated.sequence([
           Animated.timing(circleScale1, {
             toValue: 1.2,
@@ -125,9 +129,9 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish }) => {
             useNativeDriver: true,
           }),
         ])
-      ).start();
+      );
 
-      Animated.loop(
+      const circle2Animation = Animated.loop(
         Animated.sequence([
           Animated.delay(300),
           Animated.timing(circleScale2, {
@@ -141,9 +145,9 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish }) => {
             useNativeDriver: true,
           }),
         ])
-      ).start();
+      );
 
-      Animated.loop(
+      const circle3Animation = Animated.loop(
         Animated.sequence([
           Animated.delay(600),
           Animated.timing(circleScale3, {
@@ -157,17 +161,63 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish }) => {
             useNativeDriver: true,
           }),
         ])
-      ).start();
+      );
+
+      circleAnimations = [circle1Animation, circle2Animation, circle3Animation];
+      
+      circle1Animation.start();
+      circle2Animation.start();
+      circle3Animation.start();
     };
 
     // Start animations
-    animationSequence.start(() => {
-      // Animation complete, finish splash
-      setTimeout(onFinish, 800);
+    animationSequenceRef.start((finished) => {
+      if (finished) {
+        // Animation complete, finish splash
+        timeoutId = setTimeout(onFinish, 800);
+      }
     });
 
     rotateCircles();
-  }, []);
+
+    // Cleanup function
+    return () => {
+      // Clear timeout
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+
+      // Stop all animations
+      if (animationSequenceRef) {
+        animationSequenceRef.stop();
+      }
+
+      circleAnimations.forEach(animation => {
+        try {
+          animation.stop();
+        } catch (error) {
+          // Ignore cleanup errors
+        }
+      });
+
+      // Stop individual animation values
+      try {
+        logoScale.stopAnimation();
+        logoOpacity.stopAnimation();
+        titleOpacity.stopAnimation();
+        titleTranslateY.stopAnimation();
+        subtitleOpacity.stopAnimation();
+        subtitleTranslateY.stopAnimation();
+        backgroundOpacity.stopAnimation();
+        circleScale1.stopAnimation();
+        circleScale2.stopAnimation();
+        circleScale3.stopAnimation();
+        progressWidth.stopAnimation();
+      } catch (error) {
+        // Ignore cleanup errors
+      }
+    };
+  }, [onFinish]);
 
   return (
     <Animated.View style={[styles.container, { opacity: backgroundOpacity }]}>
@@ -210,7 +260,7 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish }) => {
           ]}
         >
           <View style={styles.logo}>
-            <Text style={styles.logoText}>N</Text>
+            <Text style={styles.logoText}>SFP</Text>
           </View>
         </Animated.View>
 
@@ -224,7 +274,7 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish }) => {
             },
           ]}
         >
-          <Text style={styles.title}>NeonApp</Text>
+          <Text style={styles.title}>Stock Flow Pro</Text>
         </Animated.View>
 
         {/* Subtitle */}
@@ -237,7 +287,7 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish }) => {
             },
           ]}
         >
-          <Text style={styles.subtitle}>Modern React Native Architecture</Text>
+          <Text style={styles.subtitle}>Inventory Management System</Text>
         </Animated.View>
 
         {/* Progress Bar */}
@@ -254,7 +304,7 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish }) => {
 
         {/* Loading Text */}
         <Animated.View style={[styles.loadingContainer, { opacity: subtitleOpacity }]}>
-          <Text style={styles.loadingText}>Loading amazing experience...</Text>
+          <Text style={styles.loadingText}>Loading your inventory...</Text>
         </Animated.View>
       </View>
     </Animated.View>

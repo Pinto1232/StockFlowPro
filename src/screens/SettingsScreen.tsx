@@ -1,11 +1,13 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Alert } from 'react-native';
 import { useEnvironment } from '../infrastructure/providers/EnvironmentProvider';
+import { useAuth } from '../contexts/AuthContext';
 import { Logger } from '../utils';
 
 // Single Responsibility Principle - This screen only handles settings
 export const SettingsScreen: React.FC = () => {
   const { config, isDevelopment } = useEnvironment();
+  const { user, logout, isLoading } = useAuth();
   const logger = Logger.getInstance();
 
   const handleClearLogs = () => {
@@ -44,10 +46,62 @@ export const SettingsScreen: React.FC = () => {
     Alert.alert('Test', 'Info logged - check console');
   };
 
+  const handleLogout = () => {
+    Alert.alert(
+      'Logout',
+      'Are you sure you want to logout?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Logout',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await logout();
+              Alert.alert('Success', 'You have been logged out');
+            } catch (error) {
+              Alert.alert('Error', 'Failed to logout. Please try again.');
+            }
+          },
+        },
+      ]
+    );
+  };
+
   return (
     <ScrollView style={styles.container}>
       <View style={styles.content}>
         <Text style={styles.title}>Settings</Text>
+
+        {/* User Authentication */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Account</Text>
+          {user && (
+            <>
+              <View style={styles.configItem}>
+                <Text style={styles.configLabel}>Name:</Text>
+                <Text style={styles.configValue}>{user.name}</Text>
+              </View>
+              <View style={styles.configItem}>
+                <Text style={styles.configLabel}>Email:</Text>
+                <Text style={styles.configValue}>{user.email}</Text>
+              </View>
+              <View style={styles.configItem}>
+                <Text style={styles.configLabel}>Role:</Text>
+                <Text style={styles.configValue}>{user.role}</Text>
+              </View>
+            </>
+          )}
+          <TouchableOpacity 
+            style={[styles.button, styles.logoutButton]} 
+            onPress={handleLogout}
+            disabled={isLoading}
+          >
+            <Text style={styles.buttonText}>
+              {isLoading ? 'Logging out...' : 'Logout'}
+            </Text>
+          </TouchableOpacity>
+        </View>
 
         {/* Environment Configuration */}
         <View style={styles.section}>
@@ -197,6 +251,10 @@ const styles = StyleSheet.create({
   },
   errorButton: {
     backgroundColor: '#FF3B30',
+  },
+  logoutButton: {
+    backgroundColor: '#FF3B30',
+    marginTop: 10,
   },
   buttonText: {
     color: '#fff',

@@ -1,10 +1,12 @@
 import React from 'react';
-import { Platform } from 'react-native';
+import { Platform, View, ActivityIndicator, Text, StyleSheet } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { HomeScreen, UserManagementScreen, CounterScreen, SettingsScreen } from '../screens';
 import { CustomTabBar, CustomHeader } from '../components/navigation';
-import { colors, spacing } from '../theme';
+import { AuthNavigator } from './AuthNavigator';
+import { useAuth } from '../contexts/AuthContext';
+import { colors, spacing, typography } from '../theme';
 import { BottomTabParamList } from '../types';
 
 const Tab = createBottomTabNavigator<BottomTabParamList>();
@@ -46,48 +48,87 @@ const getScreenOptions = (title: string) => ({
   tabBarHideOnKeyboard: true,
 });
 
+// Main App Tabs Component
+const MainAppTabs: React.FC = () => {
+  return (
+    <Tab.Navigator
+      tabBar={(props) => <CustomTabBar {...props} />}
+      screenOptions={{
+        headerShown: true,
+        tabBarHideOnKeyboard: Platform.OS === 'android',
+        tabBarStyle: {
+          position: 'absolute',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          backgroundColor: colors.tabBarBackground,
+          borderTopWidth: 1,
+          borderTopColor: colors.tabBarBorder,
+          paddingBottom: Platform.OS === 'ios' ? spacing.lg : spacing.md,
+          height: Platform.OS === 'ios' ? 88 : 68,
+        },
+      }}
+    >
+      <Tab.Screen
+        name="HomeTab"
+        component={HomeScreen}
+        options={getScreenOptions('Home')}
+      />
+      <Tab.Screen
+        name="UsersTab"
+        component={UserManagementScreen}
+        options={getScreenOptions('User Management')}
+      />
+      <Tab.Screen
+        name="CounterTab"
+        component={CounterScreen}
+        options={getScreenOptions('Counter')}
+      />
+      <Tab.Screen
+        name="SettingsTab"
+        component={SettingsScreen}
+        options={getScreenOptions('Settings')}
+      />
+    </Tab.Navigator>
+  );
+};
+
+// Loading Component
+const LoadingScreen: React.FC = () => {
+  return (
+    <View style={styles.loadingContainer}>
+      <ActivityIndicator size="large" color={colors.primary} />
+      <Text style={styles.loadingText}>Loading...</Text>
+    </View>
+  );
+};
+
 export const AppNavigator: React.FC = () => {
+  const { isAuthenticated, isLoading } = useAuth();
+
   return (
     <NavigationContainer theme={navigationTheme}>
-      <Tab.Navigator
-        tabBar={(props) => <CustomTabBar {...props} />}
-        screenOptions={{
-          headerShown: true,
-          tabBarHideOnKeyboard: Platform.OS === 'android',
-          tabBarStyle: {
-            position: 'absolute',
-            bottom: 0,
-            left: 0,
-            right: 0,
-            backgroundColor: colors.tabBarBackground,
-            borderTopWidth: 1,
-            borderTopColor: colors.tabBarBorder,
-            paddingBottom: Platform.OS === 'ios' ? spacing.lg : spacing.md,
-            height: Platform.OS === 'ios' ? 88 : 68,
-          },
-        }}
-      >
-        <Tab.Screen
-          name="HomeTab"
-          component={HomeScreen}
-          options={getScreenOptions('Home')}
-        />
-        <Tab.Screen
-          name="UsersTab"
-          component={UserManagementScreen}
-          options={getScreenOptions('User Management')}
-        />
-        <Tab.Screen
-          name="CounterTab"
-          component={CounterScreen}
-          options={getScreenOptions('Counter')}
-        />
-        <Tab.Screen
-          name="SettingsTab"
-          component={SettingsScreen}
-          options={getScreenOptions('Settings')}
-        />
-      </Tab.Navigator>
+      {isLoading ? (
+        <LoadingScreen />
+      ) : isAuthenticated ? (
+        <MainAppTabs />
+      ) : (
+        <AuthNavigator />
+      )}
     </NavigationContainer>
   );
 };
+
+const styles = StyleSheet.create({
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: colors.backgroundSecondary,
+  },
+  loadingText: {
+    ...typography.textStyles.body,
+    color: colors.textSecondary,
+    marginTop: spacing.md,
+  },
+});

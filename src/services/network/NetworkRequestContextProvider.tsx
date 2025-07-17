@@ -66,7 +66,13 @@ export const NetworkRequestContextProvider: React.FC<NetworkRequestContextProvid
     // Set up network status listener
     const interval = setInterval(checkNetworkStatus, 5000);
     
-    return () => clearInterval(interval);
+    return () => {
+      try {
+        clearInterval(interval);
+      } catch (error) {
+        // Ignore cleanup errors
+      }
+    };
   }, []);
 
   const value: NetworkRequestContextType = {

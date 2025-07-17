@@ -9,22 +9,27 @@ interface ParallaxHeroProps {
   children?: React.ReactNode;
 }
 
-export const ParallaxHero: React.FC<ParallaxHeroProps> = ({ scrollY, children }) => {
+export const ParallaxHero: React.FC<ParallaxHeroProps> = ({
+  scrollY,
+  children,
+}) => {
   const [currentTime, setCurrentTime] = useState(new Date());
-  const particleAnims = useRef(Array.from({ length: 15 }, () => ({
-    translateX: new Animated.Value(Math.random() * screenWidth),
-    translateY: new Animated.Value(Math.random() * screenHeight),
-    scale: new Animated.Value(Math.random() * 0.5 + 0.5),
-    opacity: new Animated.Value(Math.random() * 0.7 + 0.3),
-    rotate: new Animated.Value(0),
-  }))).current;
+  const particleAnims = useRef(
+    Array.from({ length: 15 }, () => ({
+      translateX: new Animated.Value(Math.random() * screenWidth),
+      translateY: new Animated.Value(Math.random() * screenHeight),
+      scale: new Animated.Value(Math.random() * 0.5 + 0.5),
+      opacity: new Animated.Value(Math.random() * 0.7 + 0.3),
+      rotate: new Animated.Value(0),
+    }))
+  ).current;
 
   const floatingButtonAnim = useRef(new Animated.Value(0)).current;
 
   // Dynamic gradient based on time
   const getTimeBasedGradient = () => {
     const hour = currentTime.getHours();
-    
+
     if (hour >= 6 && hour < 12) {
       // Morning - warm sunrise colors
       return ['#FF9A8B', '#A8E6CF', '#FFD3A5'];
@@ -50,12 +55,14 @@ export const ParallaxHero: React.FC<ParallaxHeroProps> = ({ scrollY, children })
 
   // Animate particles
   useEffect(() => {
+    const particleAnimations: Animated.CompositeAnimation[] = [];
+
     const animateParticles = () => {
       particleAnims.forEach((particle, index) => {
         const duration = 3000 + Math.random() * 4000;
         const delay = index * 200;
 
-        Animated.loop(
+        const animation = Animated.loop(
           Animated.sequence([
             Animated.delay(delay),
             Animated.parallel([
@@ -88,16 +95,40 @@ export const ParallaxHero: React.FC<ParallaxHeroProps> = ({ scrollY, children })
               ]),
             ]),
           ])
-        ).start();
+        );
+
+        particleAnimations.push(animation);
+        animation.start();
       });
     };
 
     animateParticles();
+
+    return () => {
+      // Stop all particle animations on cleanup
+      particleAnimations.forEach(animation => {
+        try {
+          animation.stop();
+        } catch (error) {
+          // Ignore errors during cleanup
+        }
+      });
+      particleAnims.forEach(particle => {
+        try {
+          particle.translateX.stopAnimation();
+          particle.translateY.stopAnimation();
+          particle.rotate.stopAnimation();
+          particle.opacity.stopAnimation();
+        } catch (error) {
+          // Ignore errors during cleanup
+        }
+      });
+    };
   }, []);
 
   // Floating button animation
   useEffect(() => {
-    Animated.loop(
+    const floatingAnimation = Animated.loop(
       Animated.sequence([
         Animated.timing(floatingButtonAnim, {
           toValue: 1,
@@ -110,7 +141,18 @@ export const ParallaxHero: React.FC<ParallaxHeroProps> = ({ scrollY, children })
           useNativeDriver: true,
         }),
       ])
-    ).start();
+    );
+
+    floatingAnimation.start();
+
+    return () => {
+      try {
+        floatingAnimation.stop();
+        floatingButtonAnim.stopAnimation();
+      } catch (error) {
+        // Ignore errors during cleanup
+      }
+    };
   }, []);
 
   // Parallax transforms
@@ -157,9 +199,21 @@ export const ParallaxHero: React.FC<ParallaxHeroProps> = ({ scrollY, children })
           },
         ]}
       >
-        <View style={[styles.gradientBackground, { backgroundColor: gradientColors[0] }]} />
-        <View style={[styles.gradientOverlay, { backgroundColor: gradientColors[1] }]} />
-        <View style={[styles.gradientTop, { backgroundColor: gradientColors[2] }]} />
+        <View
+          style={[
+            styles.gradientBackground,
+            { backgroundColor: gradientColors[0] },
+          ]}
+        />
+        <View
+          style={[
+            styles.gradientOverlay,
+            { backgroundColor: gradientColors[1] },
+          ]}
+        />
+        <View
+          style={[styles.gradientTop, { backgroundColor: gradientColors[2] }]}
+        />
       </Animated.View>
 
       {/* Animated Particles */}
@@ -233,9 +287,24 @@ export const ParallaxHero: React.FC<ParallaxHeroProps> = ({ scrollY, children })
           },
         ]}
       >
-        <Animated.View style={[styles.floatingButton, { backgroundColor: gradientColors[0] }]} />
-        <Animated.View style={[styles.floatingButton, { backgroundColor: gradientColors[1] }]} />
-        <Animated.View style={[styles.floatingButton, { backgroundColor: gradientColors[2] }]} />
+        <Animated.View
+          style={[
+            styles.floatingButton,
+            { backgroundColor: gradientColors[0] },
+          ]}
+        />
+        <Animated.View
+          style={[
+            styles.floatingButton,
+            { backgroundColor: gradientColors[1] },
+          ]}
+        />
+        <Animated.View
+          style={[
+            styles.floatingButton,
+            { backgroundColor: gradientColors[2] },
+          ]}
+        />
       </Animated.View>
     </View>
   );
