@@ -9,3 +9,4 @@ export {
 } from './useProductsEnhanced';
 export * from './useDashboard';
 export * from './useSignalR';
+export * from './useApiHealth';

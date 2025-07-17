@@ -1,4 +1,11 @@
-import React, { useEffect, useRef, useState, useCallback, useMemo, useLayoutEffect } from 'react';
+import React, {
+  useEffect,
+  useRef,
+  useState,
+  useCallback,
+  useMemo,
+  useLayoutEffect,
+} from 'react';
 import {
   View,
   Text,
@@ -15,13 +22,8 @@ import {
 import { colors, spacing, typography, borderRadius, shadows } from '../theme';
 import { ParallaxHero } from '../components/parallax';
 import { ErrorBoundary } from '../components/ErrorBoundary';
-import { useDashboardStats } from '../hooks';
 import { useProductsEnhanced } from '../hooks/useProductsEnhanced';
-import { ProductDataSourceSelector } from '../components/ProductDataSourceSelector';
-import {
-  safeStopAnimation,
-  debounce,
-} from '../utils/platformUtils';
+import { safeStopAnimation, debounce } from '../utils/platformUtils';
 
 const { width: screenWidth } = Dimensions.get('window');
 const CARD_WIDTH = screenWidth - spacing.lg * 4;
@@ -32,35 +34,37 @@ const HomeScreenComponent: React.FC = () => {
   const mountedRef = useRef(true);
   const componentIdRef = useRef(Math.random().toString(36).substr(2, 9));
   const cleanupExecutedRef = useRef(false);
-  
+
   // Refs
   const scrollViewRef = useRef<ScrollView>(null);
   const scrollY = useRef(new Animated.Value(0)).current;
-  
+
   // State with safe setters
   const [currentIndex, setCurrentIndex] = useState(0);
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedCard, setSelectedCard] = useState<any>(null);
-  const [showDataSourceSelector, setShowDataSourceSelector] = useState(false);
-  const [dataSource, setDataSource] = useState<'mock' | 'api' | 'both'>('api');
-  
+  const [dataSource] = useState<'mock' | 'api' | 'both'>('api');
+
   // Animation values with proper initialization
   const fadeAnim = useRef(new Animated.Value(1)).current;
   const scaleAnim = useRef(new Animated.Value(1)).current;
   const modalAnim = useRef(new Animated.Value(0)).current;
   const modalScaleAnim = useRef(new Animated.Value(0.8)).current;
-  
+
   // Animation and interval tracking with WeakSet for better memory management
   const activeAnimationsRef = useRef(new Set<Animated.CompositeAnimation>());
   const activeIntervalsRef = useRef(new Set<NodeJS.Timeout>());
   const animationCallbacksRef = useRef(new Set<() => void>());
 
   // Safe state setters that check mount status
-  const safeSetCurrentIndex = useCallback((value: number | ((prev: number) => number)) => {
-    if (mountedRef.current && !cleanupExecutedRef.current) {
-      setCurrentIndex(value);
-    }
-  }, []);
+  const safeSetCurrentIndex = useCallback(
+    (value: number | ((prev: number) => number)) => {
+      if (mountedRef.current && !cleanupExecutedRef.current) {
+        setCurrentIndex(value);
+      }
+    },
+    []
+  );
 
   const safeSetModalVisible = useCallback((value: boolean) => {
     if (mountedRef.current && !cleanupExecutedRef.current) {
@@ -75,49 +79,52 @@ const HomeScreenComponent: React.FC = () => {
   }, []);
 
   // Enhanced animation helper with better error handling
-  const safeStartAnimation = useCallback((
-    animation: Animated.CompositeAnimation, 
-    callback?: (result: any) => void
-  ) => {
-    if (!mountedRef.current || cleanupExecutedRef.current) {
-      return;
-    }
-    
-    // Add to tracking
-    activeAnimationsRef.current.add(animation);
-    
-    // Wrap callback to ensure cleanup
-    const wrappedCallback = (result: any) => {
-      // Remove from tracking
-      activeAnimationsRef.current.delete(animation);
-      
-      // Only execute callback if component is still mounted
-      if (mountedRef.current && !cleanupExecutedRef.current && callback) {
-        try {
-          callback(result);
-        } catch (error) {
-          // eslint-disable-next-line no-console
-          console.warn('Animation callback error:', error);
-        }
+  const safeStartAnimation = useCallback(
+    (
+      animation: Animated.CompositeAnimation,
+      callback?: (result: any) => void
+    ) => {
+      if (!mountedRef.current || cleanupExecutedRef.current) {
+        return;
       }
-    };
 
-    // Start animation with error handling
-    try {
-      animation.start(wrappedCallback);
-    } catch (error) {
-      // eslint-disable-next-line no-console
-      console.warn('Animation start error:', error);
-      activeAnimationsRef.current.delete(animation);
-    }
-  }, []);
+      // Add to tracking
+      activeAnimationsRef.current.add(animation);
+
+      // Wrap callback to ensure cleanup
+      const wrappedCallback = (result: any) => {
+        // Remove from tracking
+        activeAnimationsRef.current.delete(animation);
+
+        // Only execute callback if component is still mounted
+        if (mountedRef.current && !cleanupExecutedRef.current && callback) {
+          try {
+            callback(result);
+          } catch (error) {
+            // eslint-disable-next-line no-console
+            console.warn('Animation callback error:', error);
+          }
+        }
+      };
+
+      // Start animation with error handling
+      try {
+        animation.start(wrappedCallback);
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.warn('Animation start error:', error);
+        activeAnimationsRef.current.delete(animation);
+      }
+    },
+    []
+  );
 
   // Enhanced interval helper
   const safeSetInterval = useCallback((callback: () => void, delay: number) => {
     if (!mountedRef.current || cleanupExecutedRef.current) {
       return null;
     }
-    
+
     const wrappedCallback = () => {
       if (mountedRef.current && !cleanupExecutedRef.current) {
         try {
@@ -128,10 +135,10 @@ const HomeScreenComponent: React.FC = () => {
         }
       }
     };
-    
+
     const interval = setInterval(wrappedCallback, delay);
     activeIntervalsRef.current.add(interval);
-    
+
     return interval;
   }, []);
 
@@ -141,8 +148,6 @@ const HomeScreenComponent: React.FC = () => {
     isLoading: productsLoading,
     error: productsError,
     refetch: refetchProducts,
-    switchDataSource,
-    currentDataSource,
     dataSources,
     sourceErrors,
   } = useProductsEnhanced({
@@ -152,19 +157,18 @@ const HomeScreenComponent: React.FC = () => {
   });
 
   // Backward compatible data structure
-  const productsData = enhancedData ? {
-    success: enhancedData.success,
-    message: enhancedData.message,
-    data: {
-      products: enhancedData.data.products,
-      total: enhancedData.data.total,
-      page: enhancedData.data.page,
-      totalPages: enhancedData.data.totalPages,
-    }
-  } : undefined;
+  const productsData = enhancedData
+    ? {
+        success: enhancedData.success,
+        message: enhancedData.message,
+        data: enhancedData.data.products, // Direct access to products array
+        total: enhancedData.data.total,
+        page: enhancedData.data.page,
+        totalPages: enhancedData.data.totalPages,
+      }
+    : undefined;
 
-  const { data: dashboardData, error: dashboardError } = useDashboardStats();
-
+  
   // Console logging for data
   useEffect(() => {
     if (!mountedRef.current) return;
@@ -196,108 +200,85 @@ const HomeScreenComponent: React.FC = () => {
     }
   }, [enhancedData, productsError, sourceErrors, dataSources]);
 
-  useEffect(() => {
-    if (!mountedRef.current) return;
-
-    if (dashboardData) {
-      // eslint-disable-next-line no-console
-      console.log('📈 Dashboard Data Fetched:', {
-        success: dashboardData.success,
-        message: dashboardData.message,
-        stats: dashboardData.data,
-        componentId: componentIdRef.current,
-      });
-    }
-
-    if (dashboardError) {
-      // eslint-disable-next-line no-console
-      console.error('❌ Dashboard Error:', dashboardError);
-    }
-  }, [dashboardData, dashboardError]);
-
+  
   // Debounced refetch with mount check
   const debouncedRefetch = useMemo(
-    () => debounce(() => {
-      if (mountedRef.current && !cleanupExecutedRef.current) {
-        refetchProducts();
-      }
-    }, 500),
+    () =>
+      debounce(() => {
+        if (mountedRef.current && !cleanupExecutedRef.current) {
+          refetchProducts();
+        }
+      }, 500),
     [refetchProducts]
   );
 
-  // Handle data source changes
-  const handleDataSourceChange = useCallback((source: 'mock' | 'api' | 'both') => {
-    if (mountedRef.current && !cleanupExecutedRef.current) {
-      setDataSource(source);
-      switchDataSource(source);
-      // eslint-disable-next-line no-console
-      console.log(`🔄 Switched data source to: ${source}`);
-    }
-  }, [switchDataSource]);
-
+  
   // Memoized navigation items to prevent unnecessary re-renders
-  const navigationItems = useMemo(() => [
-    {
-      icon: '🏠',
-      title: 'Home',
-      desc: 'Overview and status',
-      gradient: ['#667eea', '#764ba2'],
-      color: '#667eea',
-      features: [
-        '📊 Real-time dashboard',
-        '🔄 Auto-refresh data',
-        '📈 Performance metrics',
-        '🎯 Quick actions',
-      ],
-      longDesc:
-        'The Home screen provides a comprehensive overview of your application with real-time data, performance metrics, and quick access to essential features.',
-    },
-    {
-      icon: '👥',
-      title: 'Users',
-      desc: 'User management',
-      gradient: ['#f093fb', '#f5576c'],
-      color: '#f093fb',
-      features: [
-        '👤 User profiles',
-        '🔐 Access control',
-        '📝 User registration',
-        '📊 Activity tracking',
-      ],
-      longDesc:
-        'Manage all user accounts, permissions, and activities. Create, edit, and monitor user profiles with advanced security features.',
-    },
-    {
-      icon: '🔢',
-      title: 'Counter',
-      desc: 'Counter example',
-      gradient: ['#4facfe', '#00f2fe'],
-      color: '#4facfe',
-      features: [
-        '➕ Increment values',
-        '➖ Decrement values',
-        '🔄 Reset functionality',
-        '💾 State persistence',
-      ],
-      longDesc:
-        'A simple yet powerful counter demonstration showcasing state management, persistence, and interactive controls with smooth animations.',
-    },
-    {
-      icon: '⚙️',
-      title: 'Settings',
-      desc: 'App settings',
-      gradient: ['#43e97b', '#38f9d7'],
-      color: '#43e97b',
-      features: [
-        '🎨 Theme customization',
-        '🔔 Notifications',
-        '🌐 Language settings',
-        '🔒 Privacy controls',
-      ],
-      longDesc:
-        'Customize your app experience with theme options, notification preferences, language settings, and privacy controls.',
-    },
-  ], []);
+  const navigationItems = useMemo(
+    () => [
+      {
+        icon: '🏠',
+        title: 'Home',
+        desc: 'Overview and status',
+        gradient: ['#667eea', '#764ba2'],
+        color: '#667eea',
+        features: [
+          '📊 Real-time dashboard',
+          '🔄 Auto-refresh data',
+          '📈 Performance metrics',
+          '🎯 Quick actions',
+        ],
+        longDesc:
+          'The Home screen provides a comprehensive overview of your application with real-time data, performance metrics, and quick access to essential features.',
+      },
+      {
+        icon: '👥',
+        title: 'Users',
+        desc: 'User management',
+        gradient: ['#f093fb', '#f5576c'],
+        color: '#f093fb',
+        features: [
+          '👤 User profiles',
+          '🔐 Access control',
+          '📝 User registration',
+          '📊 Activity tracking',
+        ],
+        longDesc:
+          'Manage all user accounts, permissions, and activities. Create, edit, and monitor user profiles with advanced security features.',
+      },
+      {
+        icon: '🔢',
+        title: 'Counter',
+        desc: 'Counter example',
+        gradient: ['#4facfe', '#00f2fe'],
+        color: '#4facfe',
+        features: [
+          '➕ Increment values',
+          '➖ Decrement values',
+          '🔄 Reset functionality',
+          '💾 State persistence',
+        ],
+        longDesc:
+          'A simple yet powerful counter demonstration showcasing state management, persistence, and interactive controls with smooth animations.',
+      },
+      {
+        icon: '⚙️',
+        title: 'Settings',
+        desc: 'App settings',
+        gradient: ['#43e97b', '#38f9d7'],
+        color: '#43e97b',
+        features: [
+          '🎨 Theme customization',
+          '🔔 Notifications',
+          '🌐 Language settings',
+          '🔒 Privacy controls',
+        ],
+        longDesc:
+          'Customize your app experience with theme options, notification preferences, language settings, and privacy controls.',
+      },
+    ],
+    []
+  );
 
   // Auto-slide functionality with bulletproof cleanup
   useEffect(() => {
@@ -306,7 +287,7 @@ const HomeScreenComponent: React.FC = () => {
     const interval = safeSetInterval(() => {
       safeSetCurrentIndex(prevIndex => {
         if (!mountedRef.current || cleanupExecutedRef.current) return prevIndex;
-        
+
         const nextIndex = (prevIndex + 1) % navigationItems.length;
 
         // Create transition animation with proper cleanup
@@ -349,42 +330,60 @@ const HomeScreenComponent: React.FC = () => {
         activeIntervalsRef.current.delete(interval);
       }
     };
-  }, [fadeAnim, scaleAnim, navigationItems.length, safeSetInterval, safeStartAnimation, safeSetCurrentIndex]);
+  }, [
+    fadeAnim,
+    scaleAnim,
+    navigationItems.length,
+    safeSetInterval,
+    safeStartAnimation,
+    safeSetCurrentIndex,
+  ]);
 
   // Modal handlers with enhanced safety
-  const handleCardPress = useCallback((index: number) => {
-    if (!mountedRef.current || cleanupExecutedRef.current) return;
-    
-    safeSetCurrentIndex(index);
-    safeSetSelectedCard(navigationItems[index]);
-    safeSetModalVisible(true);
+  const handleCardPress = useCallback(
+    (index: number) => {
+      if (!mountedRef.current || cleanupExecutedRef.current) return;
 
-    // Reset animation values safely
-    try {
-      modalAnim.setValue(0);
-      modalScaleAnim.setValue(0.8);
-    } catch (error) {
-      // eslint-disable-next-line no-console
-      console.warn('Modal animation reset error:', error);
-      return;
-    }
+      safeSetCurrentIndex(index);
+      safeSetSelectedCard(navigationItems[index]);
+      safeSetModalVisible(true);
 
-    const animation = Animated.parallel([
-      Animated.timing(modalAnim, {
-        toValue: 1,
-        duration: 300,
-        useNativeDriver: true,
-      }),
-      Animated.spring(modalScaleAnim, {
-        toValue: 1,
-        tension: 100,
-        friction: 8,
-        useNativeDriver: true,
-      }),
-    ]);
+      // Reset animation values safely
+      try {
+        modalAnim.setValue(0);
+        modalScaleAnim.setValue(0.8);
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.warn('Modal animation reset error:', error);
+        return;
+      }
 
-    safeStartAnimation(animation);
-  }, [navigationItems, modalAnim, modalScaleAnim, safeStartAnimation, safeSetCurrentIndex, safeSetSelectedCard, safeSetModalVisible]);
+      const animation = Animated.parallel([
+        Animated.timing(modalAnim, {
+          toValue: 1,
+          duration: 300,
+          useNativeDriver: true,
+        }),
+        Animated.spring(modalScaleAnim, {
+          toValue: 1,
+          tension: 100,
+          friction: 8,
+          useNativeDriver: true,
+        }),
+      ]);
+
+      safeStartAnimation(animation);
+    },
+    [
+      navigationItems,
+      modalAnim,
+      modalScaleAnim,
+      safeStartAnimation,
+      safeSetCurrentIndex,
+      safeSetSelectedCard,
+      safeSetModalVisible,
+    ]
+  );
 
   const closeModal = useCallback(() => {
     if (!mountedRef.current || cleanupExecutedRef.current) return;
@@ -415,21 +414,29 @@ const HomeScreenComponent: React.FC = () => {
         }
       }
     });
-  }, [modalAnim, modalScaleAnim, safeStartAnimation, safeSetModalVisible, safeSetSelectedCard]);
+  }, [
+    modalAnim,
+    modalScaleAnim,
+    safeStartAnimation,
+    safeSetModalVisible,
+    safeSetSelectedCard,
+  ]);
 
   // Enhanced cleanup with multiple safety layers
   useLayoutEffect(() => {
     return () => {
       // Mark as unmounted immediately
       mountedRef.current = false;
-      
+
       // Prevent multiple cleanup executions
       if (cleanupExecutedRef.current) return;
       cleanupExecutedRef.current = true;
-      
+
       // eslint-disable-next-line no-console
-      console.log(`🧹 Cleaning up HomeScreen component ${componentIdRef.current}`);
-      
+      console.log(
+        `🧹 Cleaning up HomeScreen component ${componentIdRef.current}`
+      );
+
       // Stop all active animations with error handling
       const animationsToStop = Array.from(activeAnimationsRef.current);
       animationsToStop.forEach(animation => {
@@ -440,7 +447,7 @@ const HomeScreenComponent: React.FC = () => {
         }
       });
       activeAnimationsRef.current.clear();
-      
+
       // Clear all intervals with error handling
       const intervalsToStop = Array.from(activeIntervalsRef.current);
       intervalsToStop.forEach(interval => {
@@ -451,7 +458,7 @@ const HomeScreenComponent: React.FC = () => {
         }
       });
       activeIntervalsRef.current.clear();
-      
+
       // Execute any registered callbacks
       const callbacksToExecute = Array.from(animationCallbacksRef.current);
       callbacksToExecute.forEach(callback => {
@@ -462,9 +469,15 @@ const HomeScreenComponent: React.FC = () => {
         }
       });
       animationCallbacksRef.current.clear();
-      
+
       // Stop animated values with error handling
-      const animatedValues = [fadeAnim, scaleAnim, modalAnim, modalScaleAnim, scrollY];
+      const animatedValues = [
+        fadeAnim,
+        scaleAnim,
+        modalAnim,
+        modalScaleAnim,
+        scrollY,
+      ];
       animatedValues.forEach(animatedValue => {
         try {
           safeStopAnimation(animatedValue);
@@ -472,9 +485,11 @@ const HomeScreenComponent: React.FC = () => {
           // Silently ignore cleanup errors
         }
       });
-      
+
       // eslint-disable-next-line no-console
-      console.log(`✅ HomeScreen component ${componentIdRef.current} cleanup completed`);
+      console.log(
+        `✅ HomeScreen component ${componentIdRef.current} cleanup completed`
+      );
     };
   }, [fadeAnim, scaleAnim, modalAnim, modalScaleAnim, scrollY]);
 
@@ -509,37 +524,10 @@ const HomeScreenComponent: React.FC = () => {
           </ErrorBoundary>
 
           <View style={styles.content}>
-            {/* Data Source Selector */}
-            <View style={styles.section}>
-              <View style={styles.sectionHeader}>
-                <Text style={styles.sectionTitle}>🔄 Data Source Configuration</Text>
-                <TouchableOpacity
-                  style={styles.toggleButton}
-                  onPress={() => setShowDataSourceSelector(!showDataSourceSelector)}
-                >
-                  <Text style={styles.toggleButtonText}>
-                    {showDataSourceSelector ? '🔼 Hide' : '🔽 Show'} Settings
-                  </Text>
-                </TouchableOpacity>
-              </View>
-              
-              {showDataSourceSelector && (
-                <ProductDataSourceSelector
-                  onDataSourceChange={handleDataSourceChange}
-                  showHealthStatus={true}
-                  showProductCount={true}
-                />
-              )}
-            </View>
-
             {/* Products Section */}
             <View style={styles.section}>
               <View style={styles.sectionHeader}>
                 <Text style={styles.sectionTitle}>📦 Products</Text>
-                <Text style={styles.sectionSubtitle}>
-                  Data from: {dataSources.length > 0 ? dataSources.join(' + ') : 'Loading...'}
-                  {currentDataSource === 'api' && ' (Backend: http://localhost:5131/api/products)'}
-                </Text>
               </View>
 
               {productsLoading ? (
@@ -563,7 +551,7 @@ const HomeScreenComponent: React.FC = () => {
                 <View style={styles.productsContainer}>
                   <View style={styles.productsHeader}>
                     <Text style={styles.productsCount}>
-                      {productsData.data?.products?.length || 0} products found
+                      {productsData.data?.length || 0} products found
                     </Text>
                     <TouchableOpacity
                       style={styles.refreshButton}
@@ -574,8 +562,10 @@ const HomeScreenComponent: React.FC = () => {
                   </View>
 
                   <FlatList
-                    data={productsData.data?.products || []}
-                    keyExtractor={(item: any, index: number) => item?.id || `empty-${index}`}
+                    data={productsData.data || []}
+                    keyExtractor={(item: any, index: number) =>
+                      item?.id || `empty-${index}`
+                    }
                     renderItem={({ item }: { item: any }) => {
                       if (!item) {
                         return null;
@@ -613,7 +603,8 @@ const HomeScreenComponent: React.FC = () => {
                                 Price:
                               </Text>
                               <Text style={styles.productDetailValue}>
-                                {item.formattedPrice || `${item.price?.toFixed(2) || '0.00'}`}
+                                {item.formattedPrice ||
+                                  `${item.price?.toFixed(2) || '0.00'}`}
                               </Text>
                             </View>
                             <View style={styles.productDetailItem}>
@@ -624,15 +615,16 @@ const HomeScreenComponent: React.FC = () => {
                                 style={[
                                   styles.productDetailValue,
                                   {
-                                    color: item.isLowStock 
+                                    color: item.isLowStock
                                       ? colors.error
-                                      : item.isInStock 
+                                      : item.isInStock
                                         ? colors.success
                                         : colors.textPrimary,
                                   },
                                 ]}
                               >
-                                {item.stockDisplay || `${item.stockQuantity || 0} units`}
+                                {item.stockDisplay ||
+                                  `${item.stockQuantity || 0} units`}
                               </Text>
                             </View>
                           </View>
@@ -641,16 +633,19 @@ const HomeScreenComponent: React.FC = () => {
                           {(item.stockStatus || item.priceRange) && (
                             <View style={styles.productExtraInfo}>
                               {item.stockStatus && (
-                                <View style={[
-                                  styles.statusBadge,
-                                  {
-                                    backgroundColor: item.stockStatusBadge === 'danger' 
-                                      ? colors.error
-                                      : item.stockStatusBadge === 'warning'
-                                        ? colors.warning
-                                        : colors.success,
-                                  },
-                                ]}>
+                                <View
+                                  style={[
+                                    styles.statusBadge,
+                                    {
+                                      backgroundColor:
+                                        item.stockStatusBadge === 'danger'
+                                          ? colors.error
+                                          : item.stockStatusBadge === 'warning'
+                                            ? colors.warning
+                                            : colors.success,
+                                    },
+                                  ]}
+                                >
                                   <Text style={styles.statusText}>
                                     {item.stockStatus}
                                   </Text>
@@ -667,11 +662,15 @@ const HomeScreenComponent: React.FC = () => {
                           <View style={styles.productMeta}>
                             <Text style={styles.productMetaText}>
                               Created:{' '}
-                              {item.createdAt ? new Date(item.createdAt).toLocaleDateString() : 'N/A'}
+                              {item.createdAt
+                                ? new Date(item.createdAt).toLocaleDateString()
+                                : 'N/A'}
                             </Text>
                             <Text style={styles.productMetaText}>
                               Updated:{' '}
-                              {item.updatedAt ? new Date(item.updatedAt).toLocaleDateString() : 'N/A'}
+                              {item.updatedAt
+                                ? new Date(item.updatedAt).toLocaleDateString()
+                                : 'N/A'}
                             </Text>
                           </View>
                         </View>
@@ -694,45 +693,6 @@ const HomeScreenComponent: React.FC = () => {
                 <Text style={styles.noDataText}>No product data available</Text>
               )}
             </View>
-
-            {/* Dashboard Stats Section */}
-            {dashboardData?.success && (
-              <View style={styles.section}>
-                <View style={styles.sectionHeader}>
-                  <Text style={styles.sectionTitle}>📊 Dashboard Stats</Text>
-                  <Text style={styles.sectionSubtitle}>
-                    Overview statistics
-                  </Text>
-                </View>
-
-                <View style={styles.statsGrid}>
-                  <View style={styles.statCard}>
-                    <Text style={styles.statValue}>
-                      {dashboardData.data?.totalProducts || 0}
-                    </Text>
-                    <Text style={styles.statLabel}>Total Products</Text>
-                  </View>
-                  <View style={styles.statCard}>
-                    <Text style={styles.statValue}>
-                      {dashboardData.data?.totalCategories || 0}
-                    </Text>
-                    <Text style={styles.statLabel}>Categories</Text>
-                  </View>
-                  <View style={styles.statCard}>
-                    <Text style={[styles.statValue, { color: colors.error }]}>
-                      {dashboardData.data?.lowStockItems || 0}
-                    </Text>
-                    <Text style={styles.statLabel}>Low Stock</Text>
-                  </View>
-                  <View style={styles.statCard}>
-                    <Text style={[styles.statValue, { color: colors.success }]}>
-                      ${dashboardData.data?.totalValue?.toFixed(2) || '0.00'}
-                    </Text>
-                    <Text style={styles.statLabel}>Total Value</Text>
-                  </View>
-                </View>
-              </View>
-            )}
 
             {/* Navigation Info */}
             <View style={styles.card}>
@@ -905,7 +865,9 @@ const HomeScreenComponent: React.FC = () => {
                                     { backgroundColor: selectedCard.color },
                                   ]}
                                 />
-                                <Text style={styles.featureText}>{feature}</Text>
+                                <Text style={styles.featureText}>
+                                  {feature}
+                                </Text>
                               </View>
                             )
                           )}
@@ -981,10 +943,9 @@ const styles = StyleSheet.create({
     color: colors.surface,
     textAlign: 'center',
     marginBottom: spacing.sm,
-    textShadowColor: 'rgba(0, 0, 0, 0.3)',
-    textShadowOffset: { width: 0, height: 2 },
-    textShadowRadius: 4,
-  },
+    // @ts-ignore - textShadow is valid for React Native Web
+    textShadow: '0 2px 4px rgba(0, 0, 0, 0.3)',
+  } as any,
   heroSubtitle: {
     ...typography.textStyles.body,
     fontSize: 16,
@@ -992,10 +953,9 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginBottom: spacing.xl,
     opacity: 0.9,
-    textShadowColor: 'rgba(0, 0, 0, 0.2)',
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 2,
-  },
+    // @ts-ignore - textShadow is valid for React Native Web
+    textShadow: '0 1px 2px rgba(0, 0, 0, 0.2)',
+  } as any,
   content: {
     paddingHorizontal: spacing.md,
     paddingBottom: 100,

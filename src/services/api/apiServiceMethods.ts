@@ -379,38 +379,51 @@ class ApiService {
     return apiClient.delete(API_ENDPOINTS.users.delete(id));
   }
 
-  // Health Check
-  async healthCheck(): Promise<ApiResponse<{ status: string; timestamp: string }>> {
-    const endpoint = API_ENDPOINTS.health.basic;
-    const skipAuth = this.shouldSkipAuthForDevelopment(endpoint);
-    
+  // Health Check using the dedicated HealthCheckService
+  async healthCheck(): Promise<ApiResponse<{ status: string; timestamp: string; endpoint?: string; strategy?: string; responseTime?: number }>> {
     try {
-      return await apiClient.get(endpoint, { skipAuth });
-    } catch (error: any) {
-      // If health endpoint doesn't exist, try a fallback approach
-      if (error.status === 404) {
-        // eslint-disable-next-line no-console
-        console.warn('[ApiService] Health endpoint not found, trying products endpoint as fallback');
-        
-        try {
-          // Try to access products endpoint as a health check
-          await apiClient.get(API_ENDPOINTS.products.list, { skipAuth });
-          
-          // If products endpoint works, consider the API healthy
-          return {
-            data: { status: 'healthy', timestamp: new Date().toISOString() },
-            status: 200,
-            message: 'API is healthy (verified via products endpoint)',
-            success: true,
-          };
-        } catch (fallbackError) {
-          // eslint-disable-next-line no-console
-          console.warn('[ApiService] Fallback health check also failed:', fallbackError);
-          throw error; // Throw original health check error
-        }
-      }
+      // Import the health check service dynamically to avoid circular dependencies
+      const { healthCheckService } = await import('./HealthCheckService');
       
-      throw error;
+      const result = await healthCheckService.checkHealth({
+        timeout: 5000,
+        retryAttempts: 0,
+        skipAuth: this.shouldSkipAuthForDevelopment('/health'),
+        includeDetails: true
+      });
+
+      return {
+        data: {
+          status: result.status,
+          timestamp: result.timestamp,
+          endpoint: result.endpoint,
+          strategy: result.strategy,
+          responseTime: result.responseTime
+        },
+        status: result.isHealthy ? 200 : (result.details?.statusCode || 503),
+        message: result.isHealthy 
+          ? `API is healthy (verified via ${result.strategy})` 
+          : `API health check failed: ${result.details?.message || 'Unknown error'}`,
+        success: result.isHealthy,
+        errors: result.isHealthy ? undefined : [result.details?.error || 'Health check failed']
+      };
+    } catch (error: any) {
+      // Fallback if health check service fails
+      // eslint-disable-next-line no-console
+      console.error('[ApiService] Health check service failed:', error);
+      
+      return {
+        data: {
+          status: 'unhealthy',
+          timestamp: new Date().toISOString(),
+          endpoint: 'unknown',
+          strategy: 'fallback'
+        },
+        status: 503,
+        message: 'Health check service unavailable',
+        success: false,
+        errors: [error.message || 'Health check service failed']
+      };
     }
   }
 

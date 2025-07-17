@@ -362,13 +362,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.primary,
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: colors.primary,
-    shadowOffset: {
-      width: 0,
-      height: 8,
-    },
-    shadowOpacity: 0.3,
-    shadowRadius: 16,
+    boxShadow: `0 8px 16px ${colors.primary}4d`,
     elevation: 12,
   },
   logoText: {

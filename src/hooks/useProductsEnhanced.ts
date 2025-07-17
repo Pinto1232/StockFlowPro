@@ -117,19 +117,31 @@ export const useProductsEnhanced = (filters?: EnhancedProductFilters) => {
           if (apiResponse.success && apiResponse.data) {
             let apiProducts: Product[] = [];
             
+            // Cast to any to handle different response formats from backend
+            const responseData = apiResponse.data as any;
+            
             // Handle different response formats from backend
-            if (Array.isArray(apiResponse.data)) {
+            if (Array.isArray(responseData)) {
               // Direct array of products
-              apiProducts = apiResponse.data.map((product: any) => {
+              apiProducts = responseData.map((product: any) => {
                 // Check if it's already in frontend format or needs transformation
                 if (product.costPerItem !== undefined) {
                   return transformBackendProduct(product as BackendProduct);
                 }
                 return product as Product;
               });
-            } else if (apiResponse.data.products) {
+            } else if (responseData.data && Array.isArray(responseData.data)) {
+              // Response has nested data array (like your API response structure)
+              // This is the case for your API: { success: true, data: Array(10), ... }
+              apiProducts = responseData.data.map((product: any) => {
+                if (product.costPerItem !== undefined) {
+                  return transformBackendProduct(product as BackendProduct);
+                }
+                return product as Product;
+              });
+            } else if (responseData.products) {
               // Nested products array
-              apiProducts = apiResponse.data.products.map((product: any) => {
+              apiProducts = responseData.products.map((product: any) => {
                 if (product.costPerItem !== undefined) {
                   return transformBackendProduct(product as BackendProduct);
                 }
@@ -137,7 +149,7 @@ export const useProductsEnhanced = (filters?: EnhancedProductFilters) => {
               });
             } else {
               // Single product or other format
-              apiProducts = [apiResponse.data].map((product: any) => {
+              apiProducts = [responseData].map((product: any) => {
                 if (product.costPerItem !== undefined) {
                   return transformBackendProduct(product as BackendProduct);
                 }
@@ -147,7 +159,11 @@ export const useProductsEnhanced = (filters?: EnhancedProductFilters) => {
             
             // eslint-disable-next-line no-console
             console.log('🔄 Transformed API products:', {
-              originalCount: Array.isArray(apiResponse.data) ? apiResponse.data.length : (apiResponse.data.products?.length || 1),
+              originalCount: Array.isArray(responseData) 
+                ? responseData.length 
+                : Array.isArray(responseData.data) 
+                  ? responseData.data.length 
+                  : (responseData.products?.length || 1),
               transformedCount: apiProducts.length,
               sampleProduct: apiProducts[0]
             });
@@ -165,10 +181,10 @@ export const useProductsEnhanced = (filters?: EnhancedProductFilters) => {
             console.log(`✅ Real API: ${apiProducts.length} products fetched and transformed`);
             
             // Update pagination info from API response
-            if (apiResponse.data.total !== undefined) {
-              results.data.total = apiResponse.data.total;
-              results.data.page = apiResponse.data.page || 1;
-              results.data.totalPages = apiResponse.data.totalPages || 1;
+            if (responseData.total !== undefined) {
+              results.data.total = responseData.total;
+              results.data.page = responseData.page || 1;
+              results.data.totalPages = responseData.totalPages || 1;
             }
           }
         } catch (error) {

@@ -54,8 +54,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           if (response && response.success) {
             // Session is still valid, restore user
             setUser(parsedUser);
+            // eslint-disable-next-line no-console
+            console.log('[AuthContext] Health check passed, user session restored');
           } else {
             // Session expired, clear stored data
+            // eslint-disable-next-line no-console
+            console.warn('[AuthContext] Health check failed, clearing auth data:', response);
             await clearAuthData();
           }
         } catch (healthError) {
