@@ -22,6 +22,7 @@ import {
 import { colors, spacing, typography, borderRadius, shadows } from '../theme';
 import { ParallaxHero } from '../components/parallax';
 import { ErrorBoundary } from '../components/ErrorBoundary';
+import { ProductCard } from '../components/ProductCard';
 import { useProductsEnhanced } from '../hooks/useProductsEnhanced';
 import { safeStopAnimation, debounce } from '../utils/platformUtils';
 
@@ -646,114 +647,26 @@ const HomeScreenComponent: React.FC = () => {
                     keyExtractor={(item: any, index: number) =>
                       item?.id || `empty-${index}`
                     }
-                    renderItem={({ item }: { item: any }) => {
+                    renderItem={({
+                      item,
+                      index,
+                    }: {
+                      item: any;
+                      index: number;
+                    }) => {
                       if (!item) {
                         return null;
                       }
 
                       return (
-                        <View style={styles.productCard}>
-                          <View style={styles.productHeader}>
-                            <Text style={styles.productName}>{item.name}</Text>
-                            <View
-                              style={[
-                                styles.statusBadge,
-                                {
-                                  backgroundColor: item.isActive
-                                    ? colors.success
-                                    : colors.error,
-                                },
-                              ]}
-                            >
-                              <Text style={styles.statusText}>
-                                {item.isActive ? 'Active' : 'Inactive'}
-                              </Text>
-                            </View>
-                          </View>
-
-                          {item.description && (
-                            <Text style={styles.productDescription}>
-                              {item.description}
-                            </Text>
-                          )}
-
-                          <View style={styles.productDetails}>
-                            <View style={styles.productDetailItem}>
-                              <Text style={styles.productDetailLabel}>
-                                Price:
-                              </Text>
-                              <Text style={styles.productDetailValue}>
-                                {item.formattedPrice ||
-                                  `${item.price?.toFixed(2) || '0.00'}`}
-                              </Text>
-                            </View>
-                            <View style={styles.productDetailItem}>
-                              <Text style={styles.productDetailLabel}>
-                                Stock:
-                              </Text>
-                              <Text
-                                style={[
-                                  styles.productDetailValue,
-                                  {
-                                    color: item.isLowStock
-                                      ? colors.error
-                                      : item.isInStock
-                                        ? colors.success
-                                        : colors.textPrimary,
-                                  },
-                                ]}
-                              >
-                                {item.stockDisplay ||
-                                  `${item.stockQuantity || 0} units`}
-                              </Text>
-                            </View>
-                          </View>
-
-                          {/* Additional backend info */}
-                          {(item.stockStatus || item.priceRange) && (
-                            <View style={styles.productExtraInfo}>
-                              {item.stockStatus && (
-                                <View
-                                  style={[
-                                    styles.statusBadge,
-                                    {
-                                      backgroundColor:
-                                        item.stockStatusBadge === 'danger'
-                                          ? colors.error
-                                          : item.stockStatusBadge === 'warning'
-                                            ? colors.warning
-                                            : colors.success,
-                                    },
-                                  ]}
-                                >
-                                  <Text style={styles.statusText}>
-                                    {item.stockStatus}
-                                  </Text>
-                                </View>
-                              )}
-                              {item.priceRange && (
-                                <Text style={styles.priceRangeText}>
-                                  {item.priceRange}
-                                </Text>
-                              )}
-                            </View>
-                          )}
-
-                          <View style={styles.productMeta}>
-                            <Text style={styles.productMetaText}>
-                              Created:{' '}
-                              {item.createdAt
-                                ? new Date(item.createdAt).toLocaleDateString()
-                                : 'N/A'}
-                            </Text>
-                            <Text style={styles.productMetaText}>
-                              Updated:{' '}
-                              {item.updatedAt
-                                ? new Date(item.updatedAt).toLocaleDateString()
-                                : 'N/A'}
-                            </Text>
-                          </View>
-                        </View>
+                        <ProductCard
+                          item={item}
+                          index={index}
+                          onPress={() => {
+                            // eslint-disable-next-line no-console
+                            console.log('Product pressed:', item.name);
+                          }}
+                        />
                       );
                     }}
                     ListEmptyComponent={() => (
@@ -1155,91 +1068,7 @@ const styles = StyleSheet.create({
     color: colors.primary,
     fontWeight: '600',
   },
-  productCard: {
-    backgroundColor: colors.backgroundSecondary,
-    padding: spacing.lg,
-    borderRadius: borderRadius.md,
-    marginBottom: spacing.md,
-    borderWidth: 1,
-    borderColor: colors.borderLight,
-  },
-  productHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: spacing.sm,
-  },
-  productName: {
-    ...typography.textStyles.bodySmall,
-    color: colors.textPrimary,
-    fontWeight: '600',
-    flex: 1,
-    marginRight: spacing.md,
-  },
-  statusBadge: {
-    paddingHorizontal: spacing.sm,
-    paddingVertical: spacing.xs,
-    borderRadius: borderRadius.sm,
-  },
-  statusText: {
-    ...typography.textStyles.caption,
-    color: colors.surface,
-    fontWeight: '600',
-    fontSize: 10,
-  },
-  productDescription: {
-    ...typography.textStyles.body,
-    color: colors.textSecondary,
-    marginBottom: spacing.md,
-    lineHeight: 20,
-  },
-  productDetails: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: spacing.md,
-  },
-  productDetailItem: {
-    flex: 1,
-  },
-  productDetailLabel: {
-    ...typography.textStyles.caption,
-    color: colors.textSecondary,
-    marginBottom: spacing.xs,
-  },
-  productDetailValue: {
-    ...typography.textStyles.body,
-    color: colors.textPrimary,
-    fontWeight: '600',
-  },
-  productMeta: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingTop: spacing.sm,
-    borderTopWidth: 1,
-    borderTopColor: colors.borderLight,
-  },
-  productExtraInfo: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: spacing.md,
-    flexWrap: 'wrap',
-    gap: spacing.sm,
-  },
-  priceRangeText: {
-    ...typography.textStyles.caption,
-    color: colors.primary,
-    fontWeight: '600',
-    backgroundColor: colors.primary + '15',
-    paddingHorizontal: spacing.sm,
-    paddingVertical: spacing.xs,
-    borderRadius: borderRadius.sm,
-  },
-  productMetaText: {
-    ...typography.textStyles.caption,
-    color: colors.textSecondary,
-  },
-  noDataText: {
+    noDataText: {
     ...typography.textStyles.body,
     color: colors.textSecondary,
     textAlign: 'center',
