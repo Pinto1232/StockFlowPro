@@ -1,3 +1,4 @@
+/* eslint-disable no-empty */
 import React, { useEffect, useRef, useState } from 'react';
 import { View, StyleSheet, Animated, Dimensions, Text } from 'react-native';
 import { colors, spacing } from '../../theme';
@@ -180,7 +181,6 @@ export const ParallaxHero: React.FC<ParallaxHeroProps> = ({
 
   return (
     <View style={styles.container}>
-      {}
       <Animated.View
         style={[
           styles.backgroundLayer,
@@ -206,7 +206,6 @@ export const ParallaxHero: React.FC<ParallaxHeroProps> = ({
         />
       </Animated.View>
 
-      {}
       <Animated.View
         style={[
           styles.particleLayer,
@@ -239,7 +238,6 @@ export const ParallaxHero: React.FC<ParallaxHeroProps> = ({
         ))}
       </Animated.View>
 
-      {}
       <Animated.View
         style={[
           styles.foregroundLayer,
@@ -255,7 +253,6 @@ export const ParallaxHero: React.FC<ParallaxHeroProps> = ({
         {children}
       </Animated.View>
 
-      {}
       <Animated.View
         style={[
           styles.floatingButtonContainer,
