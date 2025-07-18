@@ -6,6 +6,7 @@ import {
   StyleSheet,
   ActivityIndicator,
   ScrollView,
+  Platform,
 } from 'react-native';
 import { colors, spacing, typography, borderRadius, shadows } from '../theme';
 
@@ -126,10 +127,15 @@ export const ApiConnectionTest: React.FC<ApiConnectionTestProps> = ({
       });
 
       try {
+        // Get origin based on platform
+        const origin = Platform.OS === 'web' && typeof window !== 'undefined' 
+          ? window.location.origin 
+          : 'http://localhost:8081';
+
         const corsResponse = await fetch('http://localhost:5131/api/products', {
           method: 'OPTIONS',
           headers: {
-            'Origin': window.location.origin,
+            'Origin': origin,
             'Access-Control-Request-Method': 'GET',
             'Access-Control-Request-Headers': 'Content-Type',
           },

@@ -406,8 +406,8 @@ class ApiService {
 
   async healthCheck(): Promise<ApiResponse<{ status: string; timestamp: string; endpoint?: string; strategy?: string; responseTime?: number }>> {
     try {
-      
-      const { healthCheckService } = await import('./HealthCheckService');
+      // Import HealthCheckService statically to avoid Metro bundler issues
+      const { healthCheckService } = require('./HealthCheckService');
       
       const result = await healthCheckService.checkHealth({
         timeout: 5000,
