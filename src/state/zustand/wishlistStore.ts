@@ -44,10 +44,9 @@ export const useWishlistStore = create<WishlistStore>()(
         set({ isLoading: true, error: null });
         
         try {
-          // Simulate API call
-          await new Promise(resolve => setTimeout(resolve, 1000));
           
-          // Mock wishlist items
+          await new Promise(resolve => setTimeout(resolve, 1000));
+
           const mockItems: WishlistItem[] = [
             {
               id: '1',
@@ -87,7 +86,7 @@ export const useWishlistStore = create<WishlistStore>()(
       addToWishlist: (item: WishlistItem) => set((state) => {
         const existingItem = state.items.find(i => i.auctionId === item.auctionId);
         if (existingItem) {
-          return state; // Item already in wishlist
+          return state; 
         }
         return { items: [...state.items, item] };
       }),

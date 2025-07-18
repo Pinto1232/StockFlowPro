@@ -10,7 +10,7 @@ export interface AppError {
 }
 
 export const parseError = (error: unknown): AppError => {
-  // Default error structure
+  
   const appError: AppError = {
     message: 'An unexpected error occurred',
     isNetworkError: false,
@@ -22,18 +22,16 @@ export const parseError = (error: unknown): AppError => {
     appError.message = error.message;
   }
 
-  // Handle Axios errors
   if (error && typeof error === 'object' && 'isAxiosError' in error) {
     const axiosError = error as AxiosError;
     
     if (axiosError.response) {
-      // Server responded with error status
+      
       appError.status = axiosError.response.status;
       appError.message = (axiosError.response.data as any)?.message || 
                         axiosError.response.statusText || 
                         `Server error (${axiosError.response.status})`;
-      
-      // Check for authentication errors
+
       if (axiosError.response.status === 401) {
         appError.isAuthError = true;
         appError.message = 'Authentication required. Please log in.';
@@ -42,10 +40,9 @@ export const parseError = (error: unknown): AppError => {
         appError.message = 'Access denied. Insufficient permissions.';
       }
     } else if (axiosError.request) {
-      // Request was made but no response received
-      appError.isNetworkError = true;
       
-      // Check for CORS errors
+      appError.isNetworkError = true;
+
       if (axiosError.message.includes('CORS') || 
           axiosError.message.includes('Access-Control-Allow-Origin')) {
         appError.isCorsError = true;
@@ -54,7 +51,7 @@ export const parseError = (error: unknown): AppError => {
         appError.message = 'Network error: Unable to connect to server. Please check your internet connection.';
       }
     } else {
-      // Something else happened
+      
       appError.message = `Request error: ${axiosError.message}`;
     }
   }
@@ -82,7 +79,6 @@ export const isAuthError = (error: unknown): boolean => {
   return parsedError.isAuthError;
 };
 
-// Development helper to suggest solutions
 export const getErrorSuggestion = (error: unknown): string => {
   const parsedError = parseError(error);
   

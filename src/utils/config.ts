@@ -1,4 +1,4 @@
-// React Native API Configuration for StockFlow Pro
+
 import { Platform } from 'react-native';
 
 interface PlatformConfig {
@@ -21,28 +21,28 @@ interface ApiConfig {
 }
 
 export const API_CONFIG: ApiConfig = {
-  // Development configuration
+  
   development: {
-    // Platform-specific base URLs for development
+    
     android: {
-      baseURL: 'http://10.0.2.2:5131', // Android emulator (updated port)
+      baseURL: 'http://10.0.2.2:5131', 
       timeout: 10000,
       retryAttempts: 3,
       retryDelay: 1000,
     },
     ios: {
-      baseURL: 'http://localhost:5131', // iOS simulator (updated port)
+      baseURL: 'http://localhost:5131', 
       timeout: 10000,
       retryAttempts: 3,
       retryDelay: 1000,
     },
     web: {
-      baseURL: 'http://localhost:5131', // Web development
+      baseURL: 'http://localhost:5131', 
       timeout: 10000,
       retryAttempts: 3,
       retryDelay: 1000,
     },
-    // Default fallback
+    
     default: {
       baseURL: 'http://localhost:5131',
       timeout: 10000,
@@ -50,10 +50,9 @@ export const API_CONFIG: ApiConfig = {
       retryDelay: 1000,
     }
   },
-  
-  // Production configuration
+
   production: {
-    // All platforms use the same production URL
+    
     android: {
       baseURL: 'https://your-production-api.com',
       timeout: 15000,
@@ -72,7 +71,7 @@ export const API_CONFIG: ApiConfig = {
       retryAttempts: 2,
       retryDelay: 2000,
     },
-    // Default fallback
+    
     default: {
       baseURL: 'https://your-production-api.com',
       timeout: 15000,
@@ -83,7 +82,7 @@ export const API_CONFIG: ApiConfig = {
 };
 
 export const ENDPOINTS = {
-  // Authentication
+  
   auth: {
     login: '/api/v2/auth/login',
     logout: '/api/v2/auth/logout',
@@ -91,8 +90,7 @@ export const ENDPOINTS = {
     refresh: '/api/v2/auth/refresh',
     check: '/api/v2/auth/check',
   },
-  
-  // Users
+
   users: {
     list: '/api/users',
     byId: (id: string | number) => `/api/users/${id}`,
@@ -102,8 +100,7 @@ export const ENDPOINTS = {
     update: (id: string | number) => `/api/users/${id}`,
     delete: (id: string | number) => `/api/users/${id}`,
   },
-  
-  // Products
+
   products: {
     list: '/api/products',
     byId: (id: string | number) => `/api/products/${id}`,
@@ -114,8 +111,7 @@ export const ENDPOINTS = {
     updateStock: (id: string | number) => `/api/products/${id}/stock`,
     delete: (id: string | number) => `/api/products/${id}`,
   },
-  
-  // Health
+
   health: {
     basic: '/api/health',
     detailed: '/api/health/detailed',
@@ -144,12 +140,10 @@ export const ERROR_MESSAGES = {
   UNKNOWN_ERROR: 'An unexpected error occurred.',
 };
 
-// Get current environment configuration based on platform
 export const getCurrentConfig = (): PlatformConfig => {
   const isDevelopment = __DEV__;
   const environment: keyof ApiConfig = isDevelopment ? 'development' : 'production';
-  
-  // Detect platform
+
   let platform: keyof EnvironmentConfig = 'default';
   
   if (Platform.OS === 'android') {
@@ -159,17 +153,14 @@ export const getCurrentConfig = (): PlatformConfig => {
   } else if (Platform.OS === 'web') {
     platform = 'web';
   }
-  
-  // Return platform-specific config or fallback to default
+
   return API_CONFIG[environment][platform] || API_CONFIG[environment].default;
 };
 
-// Helper function to get base URL for current platform
 export const getBaseURL = (): string => {
   return getCurrentConfig().baseURL;
 };
 
-// Helper function to get platform-specific configuration
 export const getPlatformConfig = (platform: keyof EnvironmentConfig | null = null): PlatformConfig => {
   const isDevelopment = __DEV__;
   const environment: keyof ApiConfig = isDevelopment ? 'development' : 'production';
@@ -178,22 +169,20 @@ export const getPlatformConfig = (platform: keyof EnvironmentConfig | null = nul
   return API_CONFIG[environment][targetPlatform] || API_CONFIG[environment].default;
 };
 
-// Platform detection utilities
 export const PLATFORM_INFO = {
   isAndroid: Platform.OS === 'android',
   isIOS: Platform.OS === 'ios',
   isWeb: Platform.OS === 'web',
   current: Platform.OS,
-  
-  // Get appropriate localhost URL for current platform
+
   getLocalhostURL: (port = 5131) => {
     switch (Platform.OS) {
       case 'android':
-        return `http://10.0.2.2:${port}`; // Android emulator
+        return `http://10.0.2.2:${port}`; 
       case 'ios':
       case 'web':
       default:
-        return `http://localhost:${port}`; // iOS simulator and web
+        return `http://localhost:${port}`; 
     }
   }
 };

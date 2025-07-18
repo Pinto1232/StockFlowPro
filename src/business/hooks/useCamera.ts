@@ -22,13 +22,12 @@ export const useCamera = () => {
 
   const requestPermissions = useCallback(async () => {
     try {
-      // Note: In a real implementation, you would use expo-camera or react-native-image-picker
-      // This is a placeholder for the permission logic
+
       if (Platform.OS === 'ios') {
-        // Request iOS permissions
+        
         return true;
       } else {
-        // Request Android permissions
+        
         return true;
       }
     } catch (err) {
@@ -47,8 +46,6 @@ export const useCamera = () => {
         throw new Error('Camera permission denied');
       }
 
-      // Placeholder for actual camera implementation
-      // In real app, you would use expo-image-picker or similar
       const result: ImageResult = {
         uri: 'placeholder-uri',
         width: 1920,
@@ -73,7 +70,7 @@ export const useCamera = () => {
     setError(null);
 
     try {
-      // Placeholder for actual gallery picker implementation
+      
       const result: ImageResult = {
         uri: 'placeholder-gallery-uri',
         width: 1920,

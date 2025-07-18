@@ -9,7 +9,7 @@ interface SplashScreenProps {
 }
 
 export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish }) => {
-  // Animation values
+  
   const logoScale = useRef(new Animated.Value(0)).current;
   const logoOpacity = useRef(new Animated.Value(0)).current;
   const titleOpacity = useRef(new Animated.Value(0)).current;
@@ -27,16 +27,14 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish }) => {
     let animationSequenceRef: Animated.CompositeAnimation | null = null;
     let circleAnimations: Animated.CompositeAnimation[] = [];
 
-    // Start the splash animation sequence
     animationSequenceRef = Animated.sequence([
-      // Background fade in
+      
       Animated.timing(backgroundOpacity, {
         toValue: 1,
         duration: 500,
         useNativeDriver: true,
       }),
-      
-      // Animated circles appear
+
       Animated.stagger(200, [
         Animated.spring(circleScale1, {
           toValue: 1,
@@ -57,8 +55,7 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish }) => {
           useNativeDriver: true,
         }),
       ]),
-      
-      // Logo animation
+
       Animated.parallel([
         Animated.spring(logoScale, {
           toValue: 1,
@@ -72,8 +69,7 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish }) => {
           useNativeDriver: true,
         }),
       ]),
-      
-      // Title animation
+
       Animated.parallel([
         Animated.timing(titleOpacity, {
           toValue: 1,
@@ -87,8 +83,7 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish }) => {
           useNativeDriver: true,
         }),
       ]),
-      
-      // Subtitle animation
+
       Animated.parallel([
         Animated.timing(subtitleOpacity, {
           toValue: 1,
@@ -102,19 +97,16 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish }) => {
           useNativeDriver: true,
         }),
       ]),
-      
-      // Progress bar animation
+
       Animated.timing(progressWidth, {
         toValue: screenWidth * 0.6,
         duration: 1500,
         useNativeDriver: false,
       }),
-      
-      // Hold for a moment
+
       Animated.delay(500),
     ]);
 
-    // Start continuous circle rotation with proper cleanup tracking
     const rotateCircles = () => {
       const circle1Animation = Animated.loop(
         Animated.sequence([
@@ -170,24 +162,21 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish }) => {
       circle3Animation.start();
     };
 
-    // Start animations
     animationSequenceRef.start((finished) => {
       if (finished) {
-        // Animation complete, finish splash
+        
         timeoutId = setTimeout(onFinish, 800);
       }
     });
 
     rotateCircles();
 
-    // Cleanup function
     return () => {
-      // Clear timeout
+      
       if (timeoutId) {
         clearTimeout(timeoutId);
       }
 
-      // Stop all animations
       if (animationSequenceRef) {
         animationSequenceRef.stop();
       }
@@ -196,11 +185,10 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish }) => {
         try {
           animation.stop();
         } catch (error) {
-          // Ignore cleanup errors
+          
         }
       });
 
-      // Stop individual animation values
       try {
         logoScale.stopAnimation();
         logoOpacity.stopAnimation();
@@ -214,14 +202,14 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish }) => {
         circleScale3.stopAnimation();
         progressWidth.stopAnimation();
       } catch (error) {
-        // Ignore cleanup errors
+        
       }
     };
   }, [onFinish]);
 
   return (
     <Animated.View style={[styles.container, { opacity: backgroundOpacity }]}>
-      {/* Animated Background Circles */}
+      {}
       <Animated.View
         style={[
           styles.circle1,
@@ -247,9 +235,9 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish }) => {
         ]}
       />
 
-      {/* Main Content */}
+      {}
       <View style={styles.content}>
-        {/* Logo */}
+        {}
         <Animated.View
           style={[
             styles.logoContainer,
@@ -264,7 +252,7 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish }) => {
           </View>
         </Animated.View>
 
-        {/* Title */}
+        {}
         <Animated.View
           style={[
             styles.titleContainer,
@@ -277,7 +265,7 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish }) => {
           <Text style={styles.title}>Stock Flow Pro</Text>
         </Animated.View>
 
-        {/* Subtitle */}
+        {}
         <Animated.View
           style={[
             styles.subtitleContainer,
@@ -290,7 +278,7 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish }) => {
           <Text style={styles.subtitle}>Inventory Management System</Text>
         </Animated.View>
 
-        {/* Progress Bar */}
+        {}
         <View style={styles.progressContainer}>
           <Animated.View
             style={[
@@ -302,7 +290,7 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish }) => {
           />
         </View>
 
-        {/* Loading Text */}
+        {}
         <Animated.View style={[styles.loadingContainer, { opacity: subtitleOpacity }]}>
           <Text style={styles.loadingText}>Loading your inventory...</Text>
         </Animated.View>
@@ -323,7 +311,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     zIndex: 10,
   },
-  // Animated Background Circles
+  
   circle1: {
     position: 'absolute',
     width: 300,
@@ -351,7 +339,7 @@ const styles = StyleSheet.create({
     top: screenHeight * 0.3,
     left: screenWidth * 0.1,
   },
-  // Logo
+  
   logoContainer: {
     marginBottom: spacing.xl,
   },
@@ -371,7 +359,7 @@ const styles = StyleSheet.create({
     color: colors.surface,
     textAlign: 'center',
   },
-  // Title
+  
   titleContainer: {
     marginBottom: spacing.md,
   },
@@ -383,7 +371,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     letterSpacing: 1,
   },
-  // Subtitle
+  
   subtitleContainer: {
     marginBottom: spacing.xl * 2,
   },
@@ -394,7 +382,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     letterSpacing: 0.5,
   },
-  // Progress Bar
+  
   progressContainer: {
     width: screenWidth * 0.6,
     height: 4,
@@ -408,7 +396,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.primary,
     borderRadius: 2,
   },
-  // Loading Text
+  
   loadingContainer: {
     marginTop: spacing.md,
   },

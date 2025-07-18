@@ -8,7 +8,6 @@ interface LoadingSpinnerProps {
   color?: string;
 }
 
-// Single Responsibility Principle - This component only handles loading display
 export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
   message = 'Loading...',
   size = 'large',

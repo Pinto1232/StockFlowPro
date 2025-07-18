@@ -132,7 +132,6 @@ export const ModernInput: React.FC<ModernInputProps> = ({
     }
   };
 
-  // Create web-specific styles safely
   const webStyles = Platform.OS === 'web' ? {
     outline: 'none',
     outlineWidth: 0,
@@ -212,7 +211,7 @@ export const ModernInput: React.FC<ModernInputProps> = ({
           )}
         </View>
 
-        {/* Bottom border line */}
+        {}
         <View style={styles.borderContainer}>
           <View style={[styles.borderLine, { borderBottomColor: error ? colors.error : colors.border }]} />
           <Animated.View 

@@ -1,4 +1,4 @@
-// Consistent spacing system
+
 export const spacing = {
   xs: 4,
   sm: 8,
@@ -11,7 +11,6 @@ export const spacing = {
   '5xl': 96,
 } as const;
 
-// Border radius values
 export const borderRadius = {
   none: 0,
   sm: 4,
@@ -22,7 +21,6 @@ export const borderRadius = {
   full: 9999,
 } as const;
 
-// Shadow presets
 export const shadows = {
   none: {
     shadowOffset: { width: 0, height: 0 },

@@ -1,6 +1,5 @@
 import '@testing-library/jest-native/extend-expect';
 
-// Mock React Native modules
 jest.mock('react-native', () => ({
   Platform: {
     OS: 'ios',
@@ -21,12 +20,10 @@ jest.mock('react-native', () => ({
   },
 }));
 
-// Mock AsyncStorage
 jest.mock('@react-native-async-storage/async-storage', () =>
   require('@react-native-async-storage/async-storage/jest/async-storage-mock')
 );
 
-// Mock React Navigation
 jest.mock('@react-navigation/native', () => ({
   ...jest.requireActual('@react-navigation/native'),
   useNavigation: () => ({
@@ -39,18 +36,14 @@ jest.mock('@react-navigation/native', () => ({
   }),
 }));
 
-// Mock Expo modules
 jest.mock('expo-status-bar', () => ({
   StatusBar: 'StatusBar',
 }));
 
-
-// Global test setup
 beforeEach(() => {
   jest.clearAllMocks();
 });
 
-// Suppress console warnings in tests
 global.console = {
   ...console,
   warn: jest.fn(),

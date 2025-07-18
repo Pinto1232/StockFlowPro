@@ -24,7 +24,6 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({ onSwitchToLogin 
   const [isRegistering, setIsRegistering] = useState(false);
   const { register, isLoading } = useAuth();
 
-  // Form validation setup
   const {
     formData,
     errors,
@@ -45,14 +44,13 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({ onSwitchToLogin 
       firstName: [validationRules.required('First name'), validationRules.name()],
       lastName: [validationRules.required('Last name'), validationRules.name()],
       email: [validationRules.required('Email'), validationRules.email()],
-      phoneNumber: [validationRules.phone()], // Optional field
-      dateOfBirth: [validationRules.dateOfBirth()], // Optional field
+      phoneNumber: [validationRules.phone()], 
+      dateOfBirth: [validationRules.dateOfBirth()], 
       password: [validationRules.required('Password'), validationRules.passwordSimple()],
       confirmPassword: [validationRules.required('Confirm password')],
     }
   );
 
-  // Custom validation for confirm password that depends on current password
   const validateConfirmPassword = (value: string) => {
     if (value !== formData.password) {
       return 'Passwords do not match';
@@ -68,7 +66,7 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({ onSwitchToLogin 
     setIsRegistering(true);
     
     try {
-      // Prepare registration data
+      
       const registerData: RegisterData = {
         firstName: formData.firstName.trim(),
         lastName: formData.lastName.trim(),
@@ -79,7 +77,6 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({ onSwitchToLogin 
         confirmPassword: formData.confirmPassword,
       };
 
-      // Call the registration API
       const result = await register(registerData);
       
       if (result.success) {
@@ -94,7 +91,7 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({ onSwitchToLogin 
           ]
         );
       } else {
-        // Show error message
+        
         const errorMessage = result.message || 'Registration failed. Please try again.';
         const errorDetails = result.errors?.join('\n') || '';
         

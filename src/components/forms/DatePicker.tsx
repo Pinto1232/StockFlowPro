@@ -32,14 +32,13 @@ export const DatePicker: React.FC<DatePickerProps> = ({
   const minYear = currentYear - maxAge;
   const maxYear = currentYear - minAge;
 
-  // Parse initial date or set defaults
   const parseInitialDate = () => {
     if (initialDate && initialDate.match(/^\d{4}-\d{2}-\d{2}$/)) {
       const [year, month, day] = initialDate.split('-').map(Number);
       return { year, month, day };
     }
     return {
-      year: currentYear - 25, // Default to 25 years old
+      year: currentYear - 25, 
       month: 1,
       day: 1,
     };
@@ -69,7 +68,7 @@ export const DatePicker: React.FC<DatePickerProps> = ({
   };
 
   const handleCancel = () => {
-    // Reset to initial values
+    
     setSelectedYear(initial.year);
     setSelectedMonth(initial.month);
     setSelectedDay(initial.day);

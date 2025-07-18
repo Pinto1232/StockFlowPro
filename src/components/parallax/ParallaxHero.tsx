@@ -26,26 +26,20 @@ export const ParallaxHero: React.FC<ParallaxHeroProps> = ({
 
   const floatingButtonAnim = useRef(new Animated.Value(0)).current;
 
-  // Dynamic gradient based on time
   const getTimeBasedGradient = () => {
     const hour = currentTime.getHours();
 
     if (hour >= 6 && hour < 12) {
-      // Morning - light dark blue with warm accents
       return ['#4A6FA5', '#6B8DD6', '#8BB8E8'];
     } else if (hour >= 12 && hour < 18) {
-      // Afternoon - light dark blue with purple and teal
       return ['#5A7FC7', '#7B68EE', '#20B2AA'];
     } else if (hour >= 18 && hour < 22) {
-      // Evening - light dark blue with coral and mint
       return ['#4682B4', '#FF7F7F', '#98FB98'];
     } else {
-      // Night - deeper blue with lavender and periwinkle
       return ['#2F4F4F', '#9370DB', '#CCCCFF'];
     }
   };
 
-  // Update time every minute
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentTime(new Date());
@@ -53,7 +47,6 @@ export const ParallaxHero: React.FC<ParallaxHeroProps> = ({
     return () => clearInterval(interval);
   }, []);
 
-  // Animate particles
   useEffect(() => {
     const particleAnimations: Animated.CompositeAnimation[] = [];
 
@@ -105,12 +98,11 @@ export const ParallaxHero: React.FC<ParallaxHeroProps> = ({
     animateParticles();
 
     return () => {
-      // Stop all particle animations on cleanup
       particleAnimations.forEach(animation => {
         try {
           animation.stop();
         } catch (error) {
-          // Ignore errors during cleanup
+          // Animation may already be stopped, ignore error
         }
       });
       particleAnims.forEach(particle => {
@@ -120,13 +112,12 @@ export const ParallaxHero: React.FC<ParallaxHeroProps> = ({
           particle.rotate.stopAnimation();
           particle.opacity.stopAnimation();
         } catch (error) {
-          // Ignore errors during cleanup
+          // Animation may already be stopped, ignore error
         }
       });
     };
   }, []);
 
-  // Floating button animation
   useEffect(() => {
     const floatingAnimation = Animated.loop(
       Animated.sequence([
@@ -150,12 +141,11 @@ export const ParallaxHero: React.FC<ParallaxHeroProps> = ({
         floatingAnimation.stop();
         floatingButtonAnim.stopAnimation();
       } catch (error) {
-        // Ignore errors during cleanup
+        // Animation may already be stopped, ignore error
       }
     };
   }, []);
 
-  // Parallax transforms
   const backgroundTranslateY = scrollY.interpolate({
     inputRange: [0, 300],
     outputRange: [0, -150],
@@ -190,7 +180,7 @@ export const ParallaxHero: React.FC<ParallaxHeroProps> = ({
 
   return (
     <View style={styles.container}>
-      {/* Background Layer - Slowest */}
+      {}
       <Animated.View
         style={[
           styles.backgroundLayer,
@@ -216,7 +206,7 @@ export const ParallaxHero: React.FC<ParallaxHeroProps> = ({
         />
       </Animated.View>
 
-      {/* Animated Particles */}
+      {}
       <Animated.View
         style={[
           styles.particleLayer,
@@ -249,7 +239,7 @@ export const ParallaxHero: React.FC<ParallaxHeroProps> = ({
         ))}
       </Animated.View>
 
-      {/* Foreground Content */}
+      {}
       <Animated.View
         style={[
           styles.foregroundLayer,
@@ -265,7 +255,7 @@ export const ParallaxHero: React.FC<ParallaxHeroProps> = ({
         {children}
       </Animated.View>
 
-      {/* Floating Action Buttons */}
+      {}
       <Animated.View
         style={[
           styles.floatingButtonContainer,

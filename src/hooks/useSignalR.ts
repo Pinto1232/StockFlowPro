@@ -7,7 +7,6 @@ import signalRService, {
 } from '../services/signalRService';
 import { useAuth } from '../contexts/AuthContext';
 
-// Hook for managing SignalR connection
 export const useSignalRConnection = () => {
   const [connectionState, setConnectionState] = useState<HubConnectionState>(
     signalRService.getConnectionState()
@@ -25,7 +24,7 @@ export const useSignalRConnection = () => {
     try {
       await signalRService.startConnection();
     } catch (error) {
-      // Log error in development mode only
+      
       if (__DEV__) {
         // eslint-disable-next-line no-console
         console.error('Failed to connect to SignalR:', error);
@@ -40,17 +39,15 @@ export const useSignalRConnection = () => {
   }, []);
 
   useEffect(() => {
-    // Listen to connection state changes
+    
     const unsubscribe =
       signalRService.onConnectionStateChange(setConnectionState);
 
-    // Auto-connect when authenticated
     if (isAuthenticated && !connectionAttempted.current) {
       connectionAttempted.current = true;
       connect();
     }
 
-    // Auto-disconnect when not authenticated
     if (
       !isAuthenticated &&
       connectionState !== HubConnectionState.Disconnected
@@ -73,7 +70,6 @@ export const useSignalRConnection = () => {
   };
 };
 
-// Hook for listening to product updates
 export const useProductUpdates = (productId?: string) => {
   const [latestUpdate, setLatestUpdate] = useState<ProductUpdate | null>(null);
   const [updates, setUpdates] = useState<ProductUpdate[]>([]);
@@ -81,21 +77,20 @@ export const useProductUpdates = (productId?: string) => {
 
   useEffect(() => {
     const unsubscribe = signalRService.onProductUpdate(update => {
-      // If productId is specified, only listen to that product
+      
       if (!productId || update.id === productId) {
         setLatestUpdate(update);
-        setUpdates(prev => [update, ...prev.slice(0, 9)]); // Keep last 10 updates
+        setUpdates(prev => [update, ...prev.slice(0, 9)]); 
       }
     });
 
-    // Subscribe to specific product if productId is provided and connected
     if (productId && isConnected) {
       signalRService.subscribeToProduct(productId);
     }
 
     return () => {
       unsubscribe();
-      // Unsubscribe from specific product
+      
       if (productId && isConnected) {
         signalRService.unsubscribeFromProduct(productId);
       }
@@ -113,7 +108,6 @@ export const useProductUpdates = (productId?: string) => {
   };
 };
 
-// Hook for listening to stock alerts
 export const useStockAlerts = () => {
   const [alerts, setAlerts] = useState<StockAlert[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -122,7 +116,7 @@ export const useStockAlerts = () => {
     const unsubscribe = signalRService.onStockAlert(alert => {
       setAlerts(prev => {
         const newAlerts = [alert, ...prev];
-        // Keep only last 50 alerts
+        
         return newAlerts.slice(0, 50);
       });
       setUnreadCount(prev => prev + 1);
@@ -148,7 +142,6 @@ export const useStockAlerts = () => {
   };
 };
 
-// Hook for listening to notifications
 export const useNotifications = () => {
   const [notifications, setNotifications] = useState<NotificationMessage[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -157,7 +150,7 @@ export const useNotifications = () => {
     const unsubscribe = signalRService.onNotification(notification => {
       setNotifications(prev => {
         const newNotifications = [notification, ...prev];
-        // Keep only last 100 notifications
+        
         return newNotifications.slice(0, 100);
       });
       setUnreadCount(prev => prev + 1);
@@ -188,7 +181,6 @@ export const useNotifications = () => {
   };
 };
 
-// Combined hook for all real-time features
 export const useRealTimeUpdates = (productId?: string) => {
   const connection = useSignalRConnection();
   const productUpdates = useProductUpdates(productId);

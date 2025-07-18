@@ -22,7 +22,6 @@ import { BottomTabParamList } from '../types';
 
 const Tab = createBottomTabNavigator<BottomTabParamList>();
 
-// Modern navigation theme
 const navigationTheme = {
   dark: false,
   colors: {
@@ -53,8 +52,6 @@ const navigationTheme = {
   },
 };
 
-
-// Screen options for consistent styling
 const getScreenOptions = (title: string) => ({
   header: () => (
     <CustomHeader 
@@ -65,7 +62,6 @@ const getScreenOptions = (title: string) => ({
   tabBarHideOnKeyboard: true,
 });
 
-// Main App Tabs Component
 const MainAppTabs: React.FC = () => {
   return (
     <Tab.Navigator
@@ -110,7 +106,6 @@ const MainAppTabs: React.FC = () => {
   );
 };
 
-// Loading Component
 const LoadingScreen: React.FC = () => {
   return (
     <View style={styles.loadingContainer}>

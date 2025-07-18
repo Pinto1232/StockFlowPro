@@ -42,7 +42,7 @@ export const EnvironmentProvider: React.FC<EnvironmentProviderProps> = ({
   const [config, setConfig] = useState<EnvironmentConfig>(defaultConfig);
 
   useEffect(() => {
-    // Log environment configuration in development
+    
     if (config.enableLogging && config.environment === 'development') {
       // eslint-disable-next-line no-console
       // eslint-disable-next-line no-console

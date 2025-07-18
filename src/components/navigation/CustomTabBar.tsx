@@ -10,7 +10,6 @@ import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, spacing, borderRadius, shadows, typography } from '../../theme';
 
-
 interface TabIconProps {
   routeName: string;
   focused: boolean;
@@ -153,7 +152,7 @@ const styles = StyleSheet.create({
     minHeight: 48,
   },
   tabContentFocused: {
-    // Additional styling for focused state if needed
+    
   },
   iconContainer: {
     width: 40,

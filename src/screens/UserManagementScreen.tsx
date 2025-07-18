@@ -2,7 +2,6 @@ import React from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { colors } from '../theme';
 
-// UserManagementScreen - Placeholder for future user management features
 export const UserManagementScreen: React.FC = () => {
   return (
     <ScrollView style={styles.container}>

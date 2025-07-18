@@ -52,7 +52,7 @@ export const useCounterStore = create<CounterStore>()(
         set({ isLoading: true, error: null });
         
         try {
-          // Simulate API call
+          
           await new Promise(resolve => setTimeout(resolve, 1000));
           
           set({

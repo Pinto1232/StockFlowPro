@@ -56,7 +56,7 @@ export const ProductDataSourceSelector: React.FC<ProductDataSourceSelectorProps>
 
   return (
     <View style={styles.container}>
-      {/* Header */}
+      {}
       <View style={styles.header}>
         <Text style={styles.title}>Product Data Source</Text>
         <Text style={styles.subtitle}>
@@ -64,7 +64,7 @@ export const ProductDataSourceSelector: React.FC<ProductDataSourceSelectorProps>
         </Text>
       </View>
 
-      {/* Source Selection Buttons */}
+      {}
       <View style={styles.sourceButtons}>
         <TouchableOpacity
           style={getSourceButtonStyle('mock')}
@@ -100,7 +100,7 @@ export const ProductDataSourceSelector: React.FC<ProductDataSourceSelectorProps>
         </TouchableOpacity>
       </View>
 
-      {/* Health Status */}
+      {}
       {showHealthStatus && (
         <View style={styles.healthSection}>
           <View style={styles.healthHeader}>
@@ -151,7 +151,7 @@ export const ProductDataSourceSelector: React.FC<ProductDataSourceSelectorProps>
         </View>
       )}
 
-      {/* Data Status */}
+      {}
       <View style={styles.dataStatus}>
         {isLoading ? (
           <View style={styles.loadingContainer}>
@@ -183,7 +183,7 @@ export const ProductDataSourceSelector: React.FC<ProductDataSourceSelectorProps>
         ) : null}
       </View>
 
-      {/* Source Details */}
+      {}
       {enhancedData && (
         <ScrollView style={styles.sourceDetails} showsVerticalScrollIndicator={false}>
           {enhancedData.data.sources.mock && (
@@ -207,7 +207,7 @@ export const ProductDataSourceSelector: React.FC<ProductDataSourceSelectorProps>
                 Status: {enhancedData.data.sources.api.success ? '✅ Success' : '❌ Failed'}
               </Text>
               <Text style={styles.sourceDetailText}>
-                Endpoint: http://localhost:5131/api/products
+                Endpoint: http:
               </Text>
               {enhancedData.data.sources.api.message && (
                 <Text style={styles.sourceDetailText}>

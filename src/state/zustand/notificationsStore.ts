@@ -46,10 +46,9 @@ export const useNotificationsStore = create<NotificationsStore>()(
         set({ isLoading: true, error: null });
         
         try {
-          // Simulate API call
-          await new Promise(resolve => setTimeout(resolve, 1000));
           
-          // Mock notifications
+          await new Promise(resolve => setTimeout(resolve, 1000));
+
           const mockNotifications: Notification[] = [
             {
               id: '1',

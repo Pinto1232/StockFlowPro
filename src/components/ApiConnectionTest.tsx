@@ -27,7 +27,7 @@ export const ApiConnectionTest: React.FC<ApiConnectionTestProps> = ({
     };
 
     try {
-      // Test 1: Basic connectivity to backend
+      
       testResults.tests.push({
         name: 'Backend API Connectivity',
         endpoint: 'http://localhost:5131/api/products',
@@ -73,7 +73,6 @@ export const ApiConnectionTest: React.FC<ApiConnectionTestProps> = ({
         };
       }
 
-      // Test 2: Health check endpoint
       testResults.tests.push({
         name: 'Health Check',
         endpoint: 'http://localhost:5131/api/health',
@@ -119,7 +118,6 @@ export const ApiConnectionTest: React.FC<ApiConnectionTestProps> = ({
         };
       }
 
-      // Test 3: CORS check
       testResults.tests.push({
         name: 'CORS Configuration',
         endpoint: 'http://localhost:5131/api/products',
@@ -163,7 +161,8 @@ export const ApiConnectionTest: React.FC<ApiConnectionTestProps> = ({
       }
 
     } catch (error) {
-      // Silently handle test suite errors - results will show the issue
+      // Individual test errors are already handled in their respective try-catch blocks
+      // This catch block ensures the overall test process doesn't fail
     }
 
     setResults(testResults);
@@ -196,7 +195,7 @@ export const ApiConnectionTest: React.FC<ApiConnectionTestProps> = ({
       <View style={styles.header}>
         <Text style={styles.title}>Backend API Connection Test</Text>
         <Text style={styles.subtitle}>
-          Test connectivity to http://localhost:5131/api
+          Test connectivity to http:
         </Text>
       </View>
 

@@ -1,19 +1,19 @@
-// API Health Status Component
+
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { colors, spacing, typography, borderRadius } from '../theme';
 import { useApiHealth } from '../hooks/useApiHealth';
 
 interface ApiHealthStatusProps {
-  // Show detailed information
+  
   showDetails?: boolean;
-  // Show refresh button
+  
   showRefreshButton?: boolean;
-  // Compact mode (smaller size)
+  
   compact?: boolean;
-  // Custom style
+  
   style?: any;
-  // Callback when status is pressed
+  
   onPress?: () => void;
 }
 
@@ -35,7 +35,7 @@ export const ApiHealthStatus: React.FC<ApiHealthStatusProps> = ({
     checkHealth
   } = useApiHealth({
     autoStart: true,
-    checkInterval: 60000, // Check every minute
+    checkInterval: 60000, 
     enableLogging: false
   });
 
@@ -86,7 +86,7 @@ export const ApiHealthStatus: React.FC<ApiHealthStatusProps> = ({
 
   const handleRefresh = async () => {
     try {
-      await checkHealth(true); // Force new check
+      await checkHealth(true); 
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error('Failed to refresh health check:', error);

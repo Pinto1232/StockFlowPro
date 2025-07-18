@@ -9,13 +9,11 @@ import {
 } from '../services/api';
 import { type BackendProduct, transformBackendProduct } from '../services/api/apiServiceMethods';
 
-// Enhanced Product Filters with data source selection
 export interface EnhancedProductFilters extends ProductFilters {
   dataSource?: 'auto' | 'mock' | 'api' | 'both';
-  fallbackToMock?: boolean; // If API fails, fallback to mock data
+  fallbackToMock?: boolean; 
 }
 
-// Enhanced Query Keys
 export const enhancedProductKeys = {
   all: ['products-enhanced'] as const,
   lists: () => [...enhancedProductKeys.all, 'list'] as const,
@@ -26,10 +24,8 @@ export const enhancedProductKeys = {
   lowStock: (threshold: number, source?: string) => [...enhancedProductKeys.all, 'lowStock', threshold, source] as const,
 };
 
-// Data source type
 type DataSource = 'mock' | 'api' | 'both';
 
-// Combined response type
 interface CombinedProductResponse {
   data: {
     products: Product[];
@@ -50,12 +46,11 @@ interface CombinedProductResponse {
   message: string;
 }
 
-// Enhanced Products Hook with multiple data sources
 export const useProductsEnhanced = (filters?: EnhancedProductFilters) => {
   const [dataSource, setDataSource] = useState<DataSource>(
     filters?.dataSource === 'both' ? 'both' : 
     filters?.dataSource === 'mock' ? 'mock' : 
-    filters?.dataSource === 'api' ? 'api' : 'api' // Default to API
+    filters?.dataSource === 'api' ? 'api' : 'api' 
   );
 
   const queryFn = useCallback(async (): Promise<CombinedProductResponse> => {
@@ -73,7 +68,6 @@ export const useProductsEnhanced = (filters?: EnhancedProductFilters) => {
       message: ''
     };
 
-    // Helper function to normalize product data
     const normalizeProducts = (products: Product[]): Product[] => {
       return products.map(product => ({
         ...product,
@@ -116,13 +110,11 @@ export const useProductsEnhanced = (filters?: EnhancedProductFilters) => {
           
           if (apiResponse.success && apiResponse.data) {
             let apiProducts: Product[] = [];
-            
-            // Cast to any to handle different response formats from backend
+
             const responseData = apiResponse.data as any;
-            
-            // Handle different response formats from backend
+
             if (Array.isArray(responseData)) {
-              // Direct array of products
+              
               apiProducts = responseData.map((product: any) => {
                 // Check if it's already in frontend format or needs transformation
                 if (product.costPerItem !== undefined) {
@@ -131,8 +123,7 @@ export const useProductsEnhanced = (filters?: EnhancedProductFilters) => {
                 return product as Product;
               });
             } else if (responseData.data && Array.isArray(responseData.data)) {
-              // Response has nested data array (like your API response structure)
-              // This is the case for your API: { success: true, data: Array(10), ... }
+
               apiProducts = responseData.data.map((product: any) => {
                 if (product.costPerItem !== undefined) {
                   return transformBackendProduct(product as BackendProduct);
@@ -140,7 +131,7 @@ export const useProductsEnhanced = (filters?: EnhancedProductFilters) => {
                 return product as Product;
               });
             } else if (responseData.products) {
-              // Nested products array
+              
               apiProducts = responseData.products.map((product: any) => {
                 if (product.costPerItem !== undefined) {
                   return transformBackendProduct(product as BackendProduct);
@@ -148,7 +139,7 @@ export const useProductsEnhanced = (filters?: EnhancedProductFilters) => {
                 return product as Product;
               });
             } else {
-              // Single product or other format
+              
               apiProducts = [responseData].map((product: any) => {
                 if (product.costPerItem !== undefined) {
                   return transformBackendProduct(product as BackendProduct);
@@ -172,15 +163,14 @@ export const useProductsEnhanced = (filters?: EnhancedProductFilters) => {
             if (dataSource === 'both') {
               results.data.products.push(...normalizeProducts(apiProducts));
             } else {
-              // If only API, replace mock data
+              
               results.data.products = normalizeProducts(apiProducts);
             }
             
             results.data.combinedFrom.push('api');
             // eslint-disable-next-line no-console
             console.log(`✅ Real API: ${apiProducts.length} products fetched and transformed`);
-            
-            // Update pagination info from API response
+
             if (responseData.total !== undefined) {
               results.data.total = responseData.total;
               results.data.page = responseData.page || 1;
@@ -191,8 +181,7 @@ export const useProductsEnhanced = (filters?: EnhancedProductFilters) => {
           // eslint-disable-next-line no-console
           console.warn('❌ Real API Error:', error);
           results.data.errors!.api = error as Error;
-          
-          // Fallback to mock if API fails and fallbackToMock is enabled
+
           if (filters?.fallbackToMock && dataSource === 'api' && !results.data.combinedFrom.includes('mock')) {
             try {
               // eslint-disable-next-line no-console
@@ -217,7 +206,6 @@ export const useProductsEnhanced = (filters?: EnhancedProductFilters) => {
         }
       }
 
-      // Remove duplicates if combining both sources (based on ID)
       if (dataSource === 'both' && results.data.products.length > 0) {
         const uniqueProducts = results.data.products.reduce((acc, product) => {
           if (!acc.find(p => p.id === product.id)) {
@@ -228,13 +216,10 @@ export const useProductsEnhanced = (filters?: EnhancedProductFilters) => {
         results.data.products = uniqueProducts;
       }
 
-      // Update total count
       results.data.total = results.data.products.length;
 
-      // Determine success status
       results.success = results.data.products.length > 0 || results.data.combinedFrom.length > 0;
-      
-      // Create descriptive message
+
       if (results.data.combinedFrom.length > 0) {
         const sources = results.data.combinedFrom.join(' + ');
         results.message = `Successfully fetched ${results.data.products.length} products from ${sources}`;
@@ -273,10 +258,10 @@ export const useProductsEnhanced = (filters?: EnhancedProductFilters) => {
   const query = useQuery({
     queryKey: enhancedProductKeys.list(filters || {}),
     queryFn,
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    gcTime: 10 * 60 * 1000, // 10 minutes
+    staleTime: 5 * 60 * 1000, 
+    gcTime: 10 * 60 * 1000, 
     retry: (failureCount, _error) => {
-      // Retry up to 2 times for network errors
+      
       if (failureCount < 2) {
         // eslint-disable-next-line no-console
         console.log(`🔄 Retrying query (attempt ${failureCount + 1})...`);
@@ -287,10 +272,9 @@ export const useProductsEnhanced = (filters?: EnhancedProductFilters) => {
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
   });
 
-  // Enhanced return object with additional utilities
   return {
     ...query,
-    // Original data structure for backward compatibility
+    
     data: query.data ? {
       success: query.data.success,
       message: query.data.message,
@@ -301,22 +285,21 @@ export const useProductsEnhanced = (filters?: EnhancedProductFilters) => {
         totalPages: query.data.data.totalPages,
       }
     } : undefined,
-    // Enhanced data with source information
+    
     enhancedData: query.data,
-    // Utility functions
+    
     switchDataSource: setDataSource,
     currentDataSource: dataSource,
-    // Source-specific data
+    
     mockData: query.data?.data.sources.mock,
     apiData: query.data?.data.sources.api,
-    // Error information
+    
     sourceErrors: query.data?.data.errors,
-    // Combined sources info
+    
     dataSources: query.data?.data.combinedFrom || [],
   };
 };
 
-// Hook for single product with enhanced source selection
 export const useProductEnhanced = (id: string, source: DataSource = 'api') => {
   const queryFn = useCallback(async () => {
     if (source === 'mock') {
@@ -324,7 +307,7 @@ export const useProductEnhanced = (id: string, source: DataSource = 'api') => {
     } else if (source === 'api') {
       return realApiService.getProductById(id);
     } else {
-      // Try API first, fallback to mock
+      
       try {
         return await realApiService.getProductById(id);
       } catch (error) {
@@ -343,7 +326,6 @@ export const useProductEnhanced = (id: string, source: DataSource = 'api') => {
   });
 };
 
-// Hook to test connectivity to both sources
 export const useProductSourcesHealth = () => {
   const [healthStatus, setHealthStatus] = useState<{
     mock: 'unknown' | 'healthy' | 'error';
@@ -361,7 +343,6 @@ export const useProductSourcesHealth = () => {
       api: 'unknown' 
     };
 
-    // Test Mock API
     try {
       await mockApiService.healthCheck();
       results.mock = 'healthy';
@@ -369,7 +350,6 @@ export const useProductSourcesHealth = () => {
       results.mock = 'error';
     }
 
-    // Test Real API
     try {
       await realApiService.healthCheck();
       results.api = 'healthy';
@@ -393,17 +373,15 @@ export const useProductSourcesHealth = () => {
   };
 };
 
-// Export backward compatible hook that uses the enhanced version
 export const useProducts = (filters?: ProductFilters) => {
   const enhancedFilters: EnhancedProductFilters = {
     ...filters,
-    dataSource: 'api', // Default to API for backward compatibility
-    fallbackToMock: true, // Enable fallback for better UX
+    dataSource: 'api', 
+    fallbackToMock: true, 
   };
 
   const enhancedResult = useProductsEnhanced(enhancedFilters);
 
-  // Return in the original format for backward compatibility
   return {
     data: enhancedResult.data,
     isLoading: enhancedResult.isLoading,

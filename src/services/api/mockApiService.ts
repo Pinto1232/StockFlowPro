@@ -1,4 +1,4 @@
-// Mock API Service for Testing Configuration
+
 import { 
   Product, 
   ProductFilters, 
@@ -11,7 +11,6 @@ import {
 } from './apiServiceMethods';
 import { getCurrentConfig, getBaseURL, getCurrentEnvironment } from '../config';
 
-// Mock data
 const mockProducts: Product[] = [
   {
     id: '1',
@@ -110,7 +109,6 @@ const mockDashboardStats: DashboardStats = {
   ],
 };
 
-// Mock API Service Class
 class MockApiService {
   private delay(ms: number = 500): Promise<void> {
     return new Promise(resolve => setTimeout(resolve, ms));
@@ -137,7 +135,6 @@ class MockApiService {
     };
   }
 
-  // Authentication Methods
   async login(credentials: LoginCredentials): Promise<ApiResponse<{ accessToken: string; refreshToken: string; user: any }>> {
     await this.delay();
     
@@ -164,8 +161,7 @@ class MockApiService {
 
   async register(registerData: RegisterData): Promise<ApiResponse<RegisterResponse>> {
     await this.delay(800);
-    
-    // Simulate validation errors for testing
+
     if (registerData.email === 'existing@example.com') {
       const error = new Error('User already exists');
       (error as any).response = {
@@ -177,8 +173,7 @@ class MockApiService {
       };
       throw error;
     }
-    
-    // Simulate successful registration
+
     const mockUser = {
       id: `user-${Date.now()}`,
       firstName: registerData.firstName,
@@ -240,7 +235,6 @@ class MockApiService {
     });
   }
 
-  // Product Methods
   async getProducts(filters?: ProductFilters): Promise<ApiResponse<{ products: Product[]; total: number; page: number; totalPages: number }>> {
     await this.delay();
     
@@ -364,13 +358,11 @@ class MockApiService {
     return this.createResponse(updatedProduct, 'Stock updated successfully');
   }
 
-  // Dashboard Methods
   async getDashboardStats(): Promise<ApiResponse<DashboardStats>> {
     await this.delay(700);
     return this.createResponse(mockDashboardStats, 'Dashboard stats retrieved');
   }
 
-  // Health Check
   async healthCheck(): Promise<ApiResponse<{ status: string; timestamp: string }>> {
     await this.delay(100);
     return this.createResponse({
@@ -379,7 +371,6 @@ class MockApiService {
     }, 'Service is healthy');
   }
 
-  // Inventory Methods
   async recordStockMovement(movement: StockMovement): Promise<ApiResponse<any>> {
     await this.delay(600);
     return this.createResponse({
@@ -403,7 +394,6 @@ class MockApiService {
     }, 'Report generated');
   }
 
-  // User Methods
   async getUsers(_filters?: any): Promise<ApiResponse<any[]>> {
     await this.delay();
     return this.createResponse([
@@ -413,7 +403,7 @@ class MockApiService {
 
   async getUserById(id: string): Promise<ApiResponse<any>> {
     await this.delay();
-    // Use the id parameter to return user data
+    
     const userData = { id: id, name: 'Test User', email: 'test@example.com' };
     return this.createResponse(userData);
   }
@@ -459,7 +449,6 @@ class MockApiService {
     });
   }
 
-  // Utility Methods
   getBaseUrl(): string {
     return getBaseURL();
   }
@@ -480,8 +469,6 @@ class MockApiService {
   }
 }
 
-// Create and export singleton instance
 export const mockApiService = new MockApiService();
 
-// Export default instance
 export default mockApiService;

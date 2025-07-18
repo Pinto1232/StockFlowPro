@@ -1,4 +1,4 @@
-// StockFlow Pro API Client
+
 import {
   getCurrentConfig,
   getBaseURL,
@@ -44,7 +44,6 @@ export class ApiClient {
     this.baseURL = getBaseURL();
   }
 
-  // Set authentication tokens
   setAuthTokens(accessToken: string, refreshToken?: string): void {
     this.authToken = accessToken;
     if (refreshToken) {
@@ -52,19 +51,17 @@ export class ApiClient {
     }
   }
 
-  // Clear authentication tokens
   clearAuthTokens(): void {
     this.authToken = null;
     this.refreshToken = null;
   }
 
-  // Get default headers
   private getDefaultHeaders(skipAuth: boolean = false): Record<string, string> {
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
       'Accept': 'application/json',
       'X-Client-Platform': 'mobile',
-      'X-Client-Version': '1.0.0', // You can make this dynamic
+      'X-Client-Version': '1.0.0', 
     };
 
     if (!skipAuth && this.authToken) {
@@ -74,7 +71,6 @@ export class ApiClient {
     return headers;
   }
 
-  // Log request/response if logging is enabled
   private log(message: string, data?: any): void {
     if (this.config.enableLogging && getCurrentEnvironment() !== 'production') {
       // eslint-disable-next-line no-console
@@ -82,12 +78,10 @@ export class ApiClient {
     }
   }
 
-  // Sleep utility for retry delays
   private sleep(ms: number): Promise<void> {
     return new Promise(resolve => setTimeout(resolve, ms));
   }
 
-  // Make HTTP request with retry logic
   private async makeRequest<T>(
     endpoint: string,
     options: RequestInit & RequestOptions = {}
@@ -110,7 +104,7 @@ export class ApiClient {
     const requestConfig: RequestInit = {
       ...fetchOptions,
       headers,
-      // Enable credentials to handle cookies for authentication
+      
       credentials: 'include',
     };
 
@@ -125,7 +119,7 @@ export class ApiClient {
 
     for (let attempt = 0; attempt <= retryAttempts; attempt++) {
       try {
-        // Create abort controller for timeout
+        
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), timeout);
 
@@ -138,7 +132,6 @@ export class ApiClient {
 
         this.log(`Response status: ${response.status}`);
 
-        // Handle different response types
         let responseData: any;
         const contentType = response.headers.get('content-type');
         
@@ -148,7 +141,6 @@ export class ApiClient {
           responseData = await response.text();
         }
 
-        // Check if response is successful
         if (response.ok) {
           return {
             data: responseData,
@@ -158,20 +150,17 @@ export class ApiClient {
           };
         }
 
-        // Handle specific error cases
         if (response.status === HTTP_STATUS.UNAUTHORIZED) {
-          // If skipAuth is true, we still got 401, which means the server requires auth
-          // In development mode, we should still throw the error to let the hook handle fallback
+
           if (skipAuth) {
             this.log('Received 401 even with skipAuth=true, server requires authentication');
           } else {
-            // For cookie-based auth, clear any stored tokens and let the auth context handle re-login
+            
             this.clearAuthTokens();
           }
           throw new Error(ERROR_MESSAGES.UNAUTHORIZED);
         }
 
-        // Create error from response
         const error: ApiError = {
           status: response.status,
           message: responseData?.message || this.getErrorMessage(response.status),
@@ -196,15 +185,13 @@ export class ApiClient {
         }
 
         this.log(`Request failed (attempt ${attempt + 1}/${retryAttempts + 1}):`, error.message);
-        
-        // Wait before retrying
+
         if (attempt < retryAttempts) {
-          await this.sleep(retryDelay * (attempt + 1)); // Exponential backoff
+          await this.sleep(retryDelay * (attempt + 1)); 
         }
       }
     }
 
-    // If we get here, all retries failed
     if (lastError) {
       if (lastError.name === 'AbortError') {
         throw new Error(ERROR_MESSAGES.TIMEOUT_ERROR);
@@ -215,9 +202,6 @@ export class ApiClient {
     throw new Error(ERROR_MESSAGES.UNKNOWN_ERROR);
   }
 
-  // Note: refreshAuthToken method removed since backend uses cookie-based authentication
-
-  // Get appropriate error message for status code
   private getErrorMessage(status: number): string {
     switch (status) {
       case HTTP_STATUS.BAD_REQUEST:
@@ -238,7 +222,6 @@ export class ApiClient {
     }
   }
 
-  // HTTP Methods
   async get<T>(endpoint: string, options?: RequestOptions): Promise<ApiResponse<T>> {
     return this.makeRequest<T>(endpoint, { ...options, method: 'GET' });
   }
@@ -271,14 +254,13 @@ export class ApiClient {
     return this.makeRequest<T>(endpoint, { ...options, method: 'DELETE' });
   }
 
-  // Upload file (multipart/form-data)
   async uploadFile<T>(
     endpoint: string,
     file: FormData,
     options?: Omit<RequestOptions, 'headers'>
   ): Promise<ApiResponse<T>> {
     const customHeaders = this.getDefaultHeaders(options?.skipAuth);
-    // Remove Content-Type header to let the browser set it with boundary
+    
     delete customHeaders['Content-Type'];
 
     return this.makeRequest<T>(endpoint, {
@@ -289,7 +271,6 @@ export class ApiClient {
     });
   }
 
-  // Health check
   async healthCheck(): Promise<boolean> {
     try {
       const response = await this.get(API_ENDPOINTS.health.basic, { skipAuth: true });
@@ -299,7 +280,6 @@ export class ApiClient {
     }
   }
 
-  // Update configuration (useful for environment switching)
   updateConfig(): void {
     this.config = getCurrentConfig();
     this.baseURL = getBaseURL();
@@ -307,8 +287,6 @@ export class ApiClient {
   }
 }
 
-// Create and export a singleton instance
 export const apiClient = new ApiClient();
 
-// Export default instance
 export default apiClient;

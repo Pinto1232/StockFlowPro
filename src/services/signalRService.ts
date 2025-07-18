@@ -58,11 +58,9 @@ class SignalRService {
       }
     }
 
-    // Production URL (replace with your actual production domain)
     return 'https://your-production-domain.com';
   }
 
-  // Event listeners
   private productUpdateListeners: EventCallback<ProductUpdate>[] = [];
   private stockAlertListeners: EventCallback<StockAlert>[] = [];
   private notificationListeners: EventCallback<NotificationMessage>[] = [];
@@ -111,10 +109,8 @@ class SignalRService {
         .configureLogging(LogLevel.Information)
         .build();
 
-      // Setup connection event handlers
       this.setupConnectionHandlers();
 
-      // Setup business event handlers
       this.setupEventHandlers();
 
       await this.connection.start();
@@ -123,7 +119,6 @@ class SignalRService {
       this.reconnectAttempts = 0;
       this.notifyConnectionStateListeners(HubConnectionState.Connected);
 
-      // Join user-specific group if authenticated
       if (token) {
         await this.joinUserGroup();
       }
@@ -156,7 +151,7 @@ class SignalRService {
       // eslint-disable-next-line no-console
       console.log('✅ SignalR Reconnected with ID:', connectionId);
       this.notifyConnectionStateListeners(HubConnectionState.Connected);
-      // Rejoin user group after reconnection
+      
       this.joinUserGroup();
     });
   }
@@ -164,21 +159,18 @@ class SignalRService {
   private setupEventHandlers(): void {
     if (!this.connection) return;
 
-    // Product updates
     this.connection.on('ProductUpdated', (product: ProductUpdate) => {
       // eslint-disable-next-line no-console
       console.log('📦 Product updated:', product);
       this.productUpdateListeners.forEach(listener => listener(product));
     });
 
-    // Stock alerts
     this.connection.on('StockAlert', (alert: StockAlert) => {
       // eslint-disable-next-line no-console
       console.log('⚠️ Stock alert:', alert);
       this.stockAlertListeners.forEach(listener => listener(alert));
     });
 
-    // General notifications
     this.connection.on(
       'NotificationReceived',
       (notification: NotificationMessage) => {
@@ -188,13 +180,11 @@ class SignalRService {
       }
     );
 
-    // Inventory updates
     this.connection.on('InventoryUpdated', (data: any) => {
       // eslint-disable-next-line no-console
       console.log('📊 Inventory updated:', data);
     });
 
-    // User-specific events
     this.connection.on(
       'UserNotification',
       (notification: NotificationMessage) => {
@@ -285,7 +275,6 @@ class SignalRService {
     this.connectionStateListeners.forEach(listener => listener(state));
   }
 
-  // Server method invocations
   async subscribeToProduct(productId: string): Promise<void> {
     if (this.connection?.state === HubConnectionState.Connected) {
       try {
@@ -325,7 +314,6 @@ class SignalRService {
     }
   }
 
-  // Utility methods
   getConnectionState(): HubConnectionState {
     return this.connection?.state || HubConnectionState.Disconnected;
   }
@@ -338,12 +326,10 @@ class SignalRService {
     return this.connection?.connectionId || null;
   }
 
-  // Update base URL if needed
   updateBaseURL(newBaseURL: string): void {
     this.baseURL = newBaseURL;
   }
 
-  // Clean up all listeners
   removeAllListeners(): void {
     this.productUpdateListeners = [];
     this.stockAlertListeners = [];

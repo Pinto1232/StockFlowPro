@@ -31,41 +31,34 @@ const CARD_WIDTH = screenWidth - spacing.lg * 4;
 const INITIAL_PRODUCTS_COUNT = 2;
 const PRODUCTS_PER_LOAD = 2;
 
-// Enhanced component with bulletproof lifecycle management and lazy loading
 const HomeScreenComponent: React.FC = () => {
-  // Component state tracking with multiple layers of protection
+  
   const mountedRef = useRef(true);
   const componentIdRef = useRef(Math.random().toString(36).substr(2, 9));
   const cleanupExecutedRef = useRef(false);
 
-  // Refs
   const scrollViewRef = useRef<ScrollView>(null);
   const scrollY = useRef(new Animated.Value(0)).current;
 
-  // State with safe setters
   const [currentIndex, setCurrentIndex] = useState(0);
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedCard, setSelectedCard] = useState<any>(null);
   const [dataSource] = useState<'mock' | 'api' | 'both'>('api');
 
-  // Pagination state for products
   const [displayedProductsCount, setDisplayedProductsCount] = useState(
     INITIAL_PRODUCTS_COUNT
   );
   const [isLoadingMore, setIsLoadingMore] = useState(false);
 
-  // Animation values with proper initialization
   const fadeAnim = useRef(new Animated.Value(1)).current;
   const scaleAnim = useRef(new Animated.Value(1)).current;
   const modalAnim = useRef(new Animated.Value(0)).current;
   const modalScaleAnim = useRef(new Animated.Value(0.8)).current;
 
-  // Animation and interval tracking with WeakSet for better memory management
   const activeAnimationsRef = useRef(new Set<Animated.CompositeAnimation>());
   const activeIntervalsRef = useRef(new Set<NodeJS.Timeout>());
   const animationCallbacksRef = useRef(new Set<() => void>());
 
-  // Safe state setters that check mount status
   const safeSetCurrentIndex = useCallback(
     (value: number | ((prev: number) => number)) => {
       if (mountedRef.current && !cleanupExecutedRef.current) {
@@ -102,7 +95,6 @@ const HomeScreenComponent: React.FC = () => {
     }
   }, []);
 
-  // Enhanced animation helper with better error handling
   const safeStartAnimation = useCallback(
     (
       animation: Animated.CompositeAnimation,
@@ -112,15 +104,12 @@ const HomeScreenComponent: React.FC = () => {
         return;
       }
 
-      // Add to tracking
       activeAnimationsRef.current.add(animation);
 
-      // Wrap callback to ensure cleanup
       const wrappedCallback = (result: any) => {
-        // Remove from tracking
+        
         activeAnimationsRef.current.delete(animation);
 
-        // Only execute callback if component is still mounted
         if (mountedRef.current && !cleanupExecutedRef.current && callback) {
           try {
             callback(result);
@@ -131,7 +120,6 @@ const HomeScreenComponent: React.FC = () => {
         }
       };
 
-      // Start animation with error handling
       try {
         animation.start(wrappedCallback);
       } catch (error) {
@@ -143,7 +131,6 @@ const HomeScreenComponent: React.FC = () => {
     []
   );
 
-  // Enhanced interval helper
   const safeSetInterval = useCallback((callback: () => void, delay: number) => {
     if (!mountedRef.current || cleanupExecutedRef.current) {
       return null;
@@ -166,7 +153,6 @@ const HomeScreenComponent: React.FC = () => {
     return interval;
   }, []);
 
-  // Enhanced data fetching with dual sources
   const {
     enhancedData,
     isLoading: productsLoading,
@@ -180,19 +166,17 @@ const HomeScreenComponent: React.FC = () => {
     activeOnly: true,
   });
 
-  // Backward compatible data structure
   const productsData = enhancedData
     ? {
         success: enhancedData.success,
         message: enhancedData.message,
-        data: enhancedData.data.products, // Direct access to products array
+        data: enhancedData.data.products, 
         total: enhancedData.data.total,
         page: enhancedData.data.page,
         totalPages: enhancedData.data.totalPages,
       }
     : undefined;
 
-  // Load more products function
   const loadMoreProducts = useCallback(() => {
     if (!mountedRef.current || cleanupExecutedRef.current || isLoadingMore)
       return;
@@ -205,7 +189,6 @@ const HomeScreenComponent: React.FC = () => {
 
     safeSetIsLoadingMore(true);
 
-    // Simulate loading delay for better UX
     setTimeout(() => {
       if (mountedRef.current && !cleanupExecutedRef.current) {
         const newCount = Math.min(
@@ -224,12 +207,11 @@ const HomeScreenComponent: React.FC = () => {
     safeSetIsLoadingMore,
   ]);
 
-  // Scroll handler to detect when user reaches near bottom
   const handleScroll = useCallback(
     (event: any) => {
       const { contentOffset, contentSize, layoutMeasurement } =
         event.nativeEvent;
-      const paddingToBottom = 100; // Trigger load more when 100px from bottom
+      const paddingToBottom = 100; 
 
       if (
         contentOffset.y + layoutMeasurement.height + paddingToBottom >=
@@ -241,7 +223,6 @@ const HomeScreenComponent: React.FC = () => {
     [loadMoreProducts]
   );
 
-  // Console logging for data
   useEffect(() => {
     if (!mountedRef.current) return;
 
@@ -272,7 +253,6 @@ const HomeScreenComponent: React.FC = () => {
     }
   }, [enhancedData, productsError, sourceErrors, dataSources]);
 
-  // Debounced refetch with mount check
   const debouncedRefetch = useMemo(
     () =>
       debounce(() => {
@@ -283,7 +263,6 @@ const HomeScreenComponent: React.FC = () => {
     [refetchProducts]
   );
 
-  // Memoized navigation items to prevent unnecessary re-renders
   const navigationItems = useMemo(
     () => [
       {
@@ -350,7 +329,6 @@ const HomeScreenComponent: React.FC = () => {
     []
   );
 
-  // Auto-slide functionality with bulletproof cleanup
   useEffect(() => {
     if (!mountedRef.current || cleanupExecutedRef.current) return;
 
@@ -360,7 +338,6 @@ const HomeScreenComponent: React.FC = () => {
 
         const nextIndex = (prevIndex + 1) % navigationItems.length;
 
-        // Create transition animation with proper cleanup
         const animation = Animated.sequence([
           Animated.parallel([
             Animated.timing(fadeAnim, {
@@ -393,7 +370,6 @@ const HomeScreenComponent: React.FC = () => {
       });
     }, 3000);
 
-    // Return cleanup function
     return () => {
       if (interval) {
         clearInterval(interval);
@@ -409,7 +385,6 @@ const HomeScreenComponent: React.FC = () => {
     safeSetCurrentIndex,
   ]);
 
-  // Modal handlers with enhanced safety
   const handleCardPress = useCallback(
     (index: number) => {
       if (!mountedRef.current || cleanupExecutedRef.current) return;
@@ -418,7 +393,6 @@ const HomeScreenComponent: React.FC = () => {
       safeSetSelectedCard(navigationItems[index]);
       safeSetModalVisible(true);
 
-      // Reset animation values safely
       try {
         modalAnim.setValue(0);
         modalScaleAnim.setValue(0.8);
@@ -492,13 +466,11 @@ const HomeScreenComponent: React.FC = () => {
     safeSetSelectedCard,
   ]);
 
-  // Enhanced cleanup with multiple safety layers
   useLayoutEffect(() => {
     return () => {
-      // Mark as unmounted immediately
+      
       mountedRef.current = false;
 
-      // Prevent multiple cleanup executions
       if (cleanupExecutedRef.current) return;
       cleanupExecutedRef.current = true;
 
@@ -507,40 +479,36 @@ const HomeScreenComponent: React.FC = () => {
         `🧹 Cleaning up HomeScreen component ${componentIdRef.current}`
       );
 
-      // Stop all active animations with error handling
       const animationsToStop = Array.from(activeAnimationsRef.current);
       animationsToStop.forEach(animation => {
         try {
           animation.stop();
         } catch (error) {
-          // Silently ignore cleanup errors
+          
         }
       });
       activeAnimationsRef.current.clear();
 
-      // Clear all intervals with error handling
       const intervalsToStop = Array.from(activeIntervalsRef.current);
       intervalsToStop.forEach(interval => {
         try {
           clearInterval(interval);
         } catch (error) {
-          // Silently ignore cleanup errors
+          
         }
       });
       activeIntervalsRef.current.clear();
 
-      // Execute any registered callbacks
       const callbacksToExecute = Array.from(animationCallbacksRef.current);
       callbacksToExecute.forEach(callback => {
         try {
           callback();
         } catch (error) {
-          // Silently ignore cleanup errors
+          
         }
       });
       animationCallbacksRef.current.clear();
 
-      // Stop animated values with error handling
       const animatedValues = [
         fadeAnim,
         scaleAnim,
@@ -552,7 +520,7 @@ const HomeScreenComponent: React.FC = () => {
         try {
           safeStopAnimation(animatedValue);
         } catch (error) {
-          // Silently ignore cleanup errors
+          
         }
       });
 
@@ -563,7 +531,6 @@ const HomeScreenComponent: React.FC = () => {
     };
   }, [fadeAnim, scaleAnim, modalAnim, modalScaleAnim, scrollY]);
 
-  // Early return if component is unmounted or cleanup executed
   if (!mountedRef.current || cleanupExecutedRef.current) {
     return null;
   }
@@ -584,7 +551,7 @@ const HomeScreenComponent: React.FC = () => {
           )}
           scrollEventThrottle={16}
         >
-          {/* Parallax Hero Section */}
+          {}
           <ErrorBoundary>
             <ParallaxHero scrollY={scrollY}>
               <View style={styles.heroContent}>
@@ -597,7 +564,7 @@ const HomeScreenComponent: React.FC = () => {
           </ErrorBoundary>
 
           <View style={styles.content}>
-            {/* Products Section */}
+            {}
             <View style={styles.section}>
               <View style={styles.sectionHeader}>
                 <Text style={styles.sectionTitle}>📦 Products</Text>
@@ -682,7 +649,7 @@ const HomeScreenComponent: React.FC = () => {
                     windowSize={10}
                   />
 
-                  {/* Load More Section - Discrete Design */}
+                  {}
                   {productsData.data &&
                     displayedProductsCount < productsData.data.length && (
                       <View style={styles.loadMoreContainer}>
@@ -709,7 +676,7 @@ const HomeScreenComponent: React.FC = () => {
                       </View>
                     )}
 
-                  {/* Show completion message when all products are loaded */}
+                  {}
                   {productsData.data &&
                     displayedProductsCount >= productsData.data.length &&
                     productsData.data.length > INITIAL_PRODUCTS_COUNT && (
@@ -725,14 +692,14 @@ const HomeScreenComponent: React.FC = () => {
               )}
             </View>
 
-            {/* Navigation Info */}
+            {}
             <View style={styles.card}>
-              {/*<Text style={styles.cardTitle}>Navigation</Text>*/}
+              {}
               <Text style={styles.infoText}>
                 Explore the app using the modern tab navigation below:
               </Text>
 
-              {/* Auto-sliding Navigation Cards */}
+              {}
               <View style={styles.carouselContainer}>
                 <TouchableOpacity
                   style={styles.navCard}
@@ -789,7 +756,7 @@ const HomeScreenComponent: React.FC = () => {
                 </TouchableOpacity>
               </View>
 
-              {/* Pagination Dots */}
+              {}
               <View style={styles.paginationContainer}>
                 {navigationItems.map((_, index) => (
                   <TouchableOpacity
@@ -812,7 +779,7 @@ const HomeScreenComponent: React.FC = () => {
           </View>
         </Animated.ScrollView>
 
-        {/* Enhanced Modal Popup with conditional rendering */}
+        {}
         {modalVisible && mountedRef.current && !cleanupExecutedRef.current && (
           <Modal
             visible={modalVisible}
@@ -838,7 +805,7 @@ const HomeScreenComponent: React.FC = () => {
                         { borderTopColor: selectedCard.color },
                       ]}
                     >
-                      {/* Header */}
+                      {}
                       <View
                         style={[
                           styles.modalHeader,
@@ -876,7 +843,7 @@ const HomeScreenComponent: React.FC = () => {
                         </TouchableOpacity>
                       </View>
 
-                      {/* Content */}
+                      {}
                       <ScrollView
                         style={styles.modalBody}
                         showsVerticalScrollIndicator={false}
@@ -904,7 +871,7 @@ const HomeScreenComponent: React.FC = () => {
                           )}
                         </View>
 
-                        {/* Action Buttons */}
+                        {}
                         <View style={styles.modalActions}>
                           <TouchableOpacity
                             style={[
@@ -913,7 +880,7 @@ const HomeScreenComponent: React.FC = () => {
                             ]}
                             onPress={() => {
                               closeModal();
-                              // Here you could navigate to the actual screen
+                              
                             }}
                           >
                             <Text style={styles.primaryButtonText}>
@@ -951,7 +918,6 @@ const HomeScreenComponent: React.FC = () => {
   );
 };
 
-// Export memoized component to prevent unnecessary re-renders
 export const HomeScreen = React.memo(HomeScreenComponent);
 
 const styles = StyleSheet.create({
@@ -1075,7 +1041,7 @@ const styles = StyleSheet.create({
     fontStyle: 'italic',
     paddingVertical: spacing.xl,
   },
-  // Discrete Load More styles
+  
   loadMoreContainer: {
     marginTop: spacing.md,
     alignItems: 'center',

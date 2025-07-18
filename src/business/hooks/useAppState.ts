@@ -14,8 +14,7 @@ export const useAppState = () => {
   useEffect(() => {
     const handleAppStateChange = (nextAppState: AppStateStatus) => {
       const previousState = appStateRef.current;
-      
-      // Track background time
+
       if (previousState === 'active' && nextAppState.match(/inactive|background/)) {
         backgroundTime.current = new Date();
       }

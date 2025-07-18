@@ -147,7 +147,7 @@ export const WidgetMarketplace: React.FC<WidgetMarketplaceProps> = ({
             },
           ]}
         >
-          {/* Header */}
+          {}
           <View style={styles.header}>
             <Text style={styles.title}>Widget Marketplace</Text>
             <TouchableOpacity style={styles.closeButton} onPress={onClose}>
@@ -155,7 +155,7 @@ export const WidgetMarketplace: React.FC<WidgetMarketplaceProps> = ({
             </TouchableOpacity>
           </View>
 
-          {/* Categories */}
+          {}
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.categoriesContainer}>
             {categories.map(category => (
               <TouchableOpacity
@@ -179,7 +179,7 @@ export const WidgetMarketplace: React.FC<WidgetMarketplaceProps> = ({
             ))}
           </ScrollView>
 
-          {/* Widget Grid */}
+          {}
           <ScrollView style={styles.widgetGrid} showsVerticalScrollIndicator={false}>
             <View style={styles.widgetRow}>
               {filteredWidgets.map(widget => (

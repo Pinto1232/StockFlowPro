@@ -9,7 +9,6 @@ interface UserCardProps {
   onToggleStatus?: (user: LegacyUser) => void;
 }
 
-// Single Responsibility Principle - This component only handles user card display
 export const UserCard: React.FC<UserCardProps> = ({
   user,
   onEdit,

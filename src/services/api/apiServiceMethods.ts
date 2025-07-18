@@ -1,9 +1,7 @@
-// API Service Methods for StockFlow Pro Mobile
+
 import { apiClient } from './ApiClient';
 import { API_ENDPOINTS, getCurrentEnvironment } from '../config';
 
-// Type definitions
-// Backend product structure (what your API returns)
 export interface BackendProduct {
   id: string;
   name: string;
@@ -28,7 +26,6 @@ export interface BackendProduct {
   createdFriendly: string;
 }
 
-// Frontend product structure (what the UI expects)
 export interface Product {
   id: string;
   name: string;
@@ -40,7 +37,7 @@ export interface Product {
   price: number;
   cost?: number;
   quantity: number;
-  stockQuantity: number; // Added for backward compatibility with HomeScreen
+  stockQuantity: number; 
   minStockLevel?: number;
   maxStockLevel?: number;
   unit?: string;
@@ -52,7 +49,7 @@ export interface Product {
   isActive: boolean;
   createdAt: string;
   updatedAt?: string;
-  // Additional fields from backend
+  
   formattedPrice?: string;
   stockDisplay?: string;
   stockLevel?: string;
@@ -67,7 +64,6 @@ export interface Product {
   createdFriendly?: string;
 }
 
-// Helper function to transform backend product to frontend format
 export function transformBackendProduct(backendProduct: BackendProduct): Product {
   return {
     id: backendProduct.id,
@@ -78,7 +74,7 @@ export function transformBackendProduct(backendProduct: BackendProduct): Product
     stockQuantity: backendProduct.numberInStock || 0,
     isActive: backendProduct.isActive,
     createdAt: backendProduct.createdAt,
-    // Additional fields from backend
+    
     formattedPrice: backendProduct.formattedPrice,
     stockDisplay: backendProduct.stockDisplay,
     stockLevel: backendProduct.stockLevel,
@@ -98,7 +94,7 @@ export interface ProductFilters {
   category?: string;
   supplier?: string;
   isActive?: boolean;
-  activeOnly?: boolean; // Added for backward compatibility
+  activeOnly?: boolean; 
   lowStock?: boolean;
   search?: string;
   page?: number;
@@ -176,9 +172,8 @@ export interface StockMovement {
   reference?: string;
 }
 
-// API Service Class
 class ApiService {
-  // Helper method to determine if we should skip auth for development
+  
   private shouldSkipAuthForDevelopment(endpoint: string): boolean {
     const isDevelopment = getCurrentEnvironment() === 'development';
     
@@ -192,14 +187,12 @@ class ApiService {
     if (!isDevelopment) {
       return false;
     }
-    
-    // List of endpoint patterns that can work without authentication in development
+
     const publicEndpointPatternsInDev = [
-      '/products',           // Covers /products, /products?query, /products/search, etc.
-      '/health',            // Covers all health endpoints
+      '/products',           
+      '/health',            
     ];
-    
-    // Check if the endpoint matches any of the public endpoint patterns
+
     const isPublicEndpoint = publicEndpointPatternsInDev.some(pattern => 
       endpoint.includes(pattern)
     );
@@ -214,19 +207,18 @@ class ApiService {
     return isPublicEndpoint;
   }
 
-  // Authentication Methods
   async login(credentials: LoginCredentials): Promise<ApiResponse<any>> {
-    // Your backend expects username and password for login
+    
     return apiClient.post(API_ENDPOINTS.auth.login, credentials);
   }
 
   async logout(): Promise<ApiResponse<void>> {
-    // Your backend logout endpoint
+    
     return apiClient.post(API_ENDPOINTS.auth.logout);
   }
 
   async register(registerData: RegisterData): Promise<ApiResponse<RegisterResponse>> {
-    // User registration endpoint
+    
     return apiClient.post(API_ENDPOINTS.auth.register, registerData);
   }
 
@@ -250,7 +242,6 @@ class ApiService {
     return apiClient.get(API_ENDPOINTS.auth.session);
   }
 
-  // Product Methods
   async getProducts(filters?: ProductFilters): Promise<ApiResponse<{ products: Product[]; total: number; page: number; totalPages: number }>> {
     const queryParams = new URLSearchParams();
     
@@ -328,7 +319,6 @@ class ApiService {
     return apiClient.patch(API_ENDPOINTS.products.updateStock(id), { quantity, reason });
   }
 
-  // Dashboard Methods
   async getDashboardStats(): Promise<ApiResponse<DashboardStats>> {
     const endpoint = API_ENDPOINTS.products.dashboardStats;
     const skipAuth = this.shouldSkipAuthForDevelopment(endpoint);
@@ -336,7 +326,6 @@ class ApiService {
     return apiClient.get(endpoint, { skipAuth });
   }
 
-  // Inventory Methods
   async recordStockMovement(movement: StockMovement): Promise<ApiResponse<any>> {
     return apiClient.post(API_ENDPOINTS.inventory.movements, movement);
   }
@@ -381,7 +370,6 @@ class ApiService {
     return apiClient.get(endpoint);
   }
 
-  // User Methods
   async getUsers(filters?: any): Promise<ApiResponse<any[]>> {
     const queryParams = new URLSearchParams();
     
@@ -416,10 +404,9 @@ class ApiService {
     return apiClient.delete(API_ENDPOINTS.users.delete(id));
   }
 
-  // Health Check using the dedicated HealthCheckService
   async healthCheck(): Promise<ApiResponse<{ status: string; timestamp: string; endpoint?: string; strategy?: string; responseTime?: number }>> {
     try {
-      // Import the health check service dynamically to avoid circular dependencies
+      
       const { healthCheckService } = await import('./HealthCheckService');
       
       const result = await healthCheckService.checkHealth({
@@ -445,7 +432,7 @@ class ApiService {
         errors: result.isHealthy ? undefined : [result.details?.error || 'Health check failed']
       };
     } catch (error: any) {
-      // Fallback if health check service fails
+      
       // eslint-disable-next-line no-console
       console.error('[ApiService] Health check service failed:', error);
       
@@ -478,12 +465,10 @@ class ApiService {
     return apiClient.get(endpoint, { skipAuth });
   }
 
-  // File Upload
   async uploadFile(file: FormData, endpoint: string = '/upload'): Promise<ApiResponse<{ url: string; filename: string }>> {
     return apiClient.uploadFile(endpoint, file);
   }
 
-  // Utility Methods
   getBaseUrl(): string {
     return apiClient['baseURL'];
   }
@@ -501,8 +486,6 @@ class ApiService {
   }
 }
 
-// Create and export singleton instance
 export const apiService = new ApiService();
 
-// Export default instance
 export default apiService;

@@ -29,8 +29,7 @@ export const WidgetGrid: React.FC<WidgetGridProps> = ({
   editable = false,
 }) => {
   const [draggedWidget, setDraggedWidget] = useState<string | null>(null);
-  
-  // Create refs for all widgets at the top level
+
   const widgetRefs = useRef<{ [key: string]: {
     translateX: Animated.Value;
     translateY: Animated.Value;
@@ -38,7 +37,6 @@ export const WidgetGrid: React.FC<WidgetGridProps> = ({
     opacity: Animated.Value;
   } }>({});
 
-  // Initialize refs for new widgets and update positions
   useEffect(() => {
     widgets.forEach(widget => {
       if (!widgetRefs.current[widget.id]) {
@@ -49,17 +47,16 @@ export const WidgetGrid: React.FC<WidgetGridProps> = ({
           opacity: new Animated.Value(1),
         };
       } else {
-        // Update position if widget moved
+        
         widgetRefs.current[widget.id].translateX.setValue(widget.position.x);
         widgetRefs.current[widget.id].translateY.setValue(widget.position.y);
       }
     });
 
-    // Clean up refs for removed widgets
     const currentWidgetIds = widgets.map(w => w.id);
     Object.keys(widgetRefs.current).forEach(id => {
       if (!currentWidgetIds.includes(id)) {
-        // Stop animations before cleanup
+        
         const refs = widgetRefs.current[id];
         if (refs) {
           refs.translateX.stopAnimation();
@@ -72,10 +69,9 @@ export const WidgetGrid: React.FC<WidgetGridProps> = ({
     });
   }, [widgets]);
 
-  // Cleanup effect to prevent memory leaks
   useEffect(() => {
     return () => {
-      // Stop all animations when component unmounts
+      
       Object.values(widgetRefs.current).forEach(refs => {
         if (refs) {
           refs.translateX.stopAnimation();
@@ -97,12 +93,10 @@ export const WidgetGrid: React.FC<WidgetGridProps> = ({
     const gridWidth = Math.ceil(width / (WIDGET_SIZE + spacing.sm));
     const gridHeight = Math.ceil(height / (WIDGET_SIZE + spacing.sm));
 
-    // Check bounds
     if (gridX < 0 || gridY < 0 || gridX + gridWidth > GRID_SIZE) {
       return false;
     }
 
-    // Check collision with other widgets
     for (const widget of widgets) {
       if (widget.id === excludeId) continue;
       
@@ -125,7 +119,7 @@ export const WidgetGrid: React.FC<WidgetGridProps> = ({
   };
 
   const renderWidget = (widget: Widget) => {
-    // Get refs for this widget
+    
     const refs = widgetRefs.current[widget.id];
     if (!refs) return null;
 
@@ -135,7 +129,7 @@ export const WidgetGrid: React.FC<WidgetGridProps> = ({
       onMoveShouldSetPanResponder: () => editable,
       onPanResponderGrant: () => {
         setDraggedWidget(widget.id);
-        // Stop any existing animations
+        
         scale.stopAnimation();
         opacity.stopAnimation();
         
@@ -158,14 +152,13 @@ export const WidgetGrid: React.FC<WidgetGridProps> = ({
         const newX = snapToGrid(widget.position.x + gestureState.dx);
         const newY = snapToGrid(widget.position.y + gestureState.dy);
 
-        // Stop any existing animations
         translateX.stopAnimation();
         translateY.stopAnimation();
         scale.stopAnimation();
         opacity.stopAnimation();
 
         if (isValidPosition(newX, newY, widget.size.width, widget.size.height, widget.id)) {
-          // Valid position - animate to snapped position
+          
           Animated.parallel([
             Animated.spring(translateX, {
               toValue: newX,
@@ -189,7 +182,7 @@ export const WidgetGrid: React.FC<WidgetGridProps> = ({
             }
           });
         } else {
-          // Invalid position - animate back to original
+          
           Animated.parallel([
             Animated.spring(translateX, {
               toValue: widget.position.x,
@@ -267,7 +260,6 @@ export const WidgetGrid: React.FC<WidgetGridProps> = ({
   );
 };
 
-// Widget Components
 const WeatherWidget: React.FC<{ data?: any }> = () => (
   <View style={styles.widgetContent}>
     <Animated.Text style={styles.widgetIcon}>☀️</Animated.Text>
@@ -301,7 +293,7 @@ const ClockWidget: React.FC = () => {
       try {
         clearInterval(interval);
       } catch (error) {
-        // Ignore cleanup errors
+        
       }
     };
   }, []);

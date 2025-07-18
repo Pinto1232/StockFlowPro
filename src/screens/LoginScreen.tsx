@@ -23,7 +23,6 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onSwitchToRegister }) 
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const { login, isLoading } = useAuth();
 
-  // Form validation setup
   const {
     formData,
     errors,
@@ -51,7 +50,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onSwitchToRegister }) 
       if (!success) {
         Alert.alert('Error', 'Invalid username or password');
       }
-      // Success will be handled by auth state change
+      
     } catch (error) {
       Alert.alert('Error', 'Login failed. Please try again.');
     } finally {

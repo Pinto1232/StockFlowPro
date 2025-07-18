@@ -16,32 +16,27 @@ export interface ValidationResult {
 
 export const validateField = (value: string, rules: ValidationRule[]): ValidationResult => {
   for (const rule of rules) {
-    // Required validation
+    
     if (rule.required && (!value || value.trim().length === 0)) {
       return { isValid: false, error: rule.message };
     }
 
-    // Skip other validations if field is empty and not required
     if (!value || value.trim().length === 0) {
       continue;
     }
 
-    // Min length validation
     if (rule.minLength && value.length < rule.minLength) {
       return { isValid: false, error: rule.message };
     }
 
-    // Max length validation
     if (rule.maxLength && value.length > rule.maxLength) {
       return { isValid: false, error: rule.message };
     }
 
-    // Pattern validation
     if (rule.pattern && !rule.pattern.test(value)) {
       return { isValid: false, error: rule.message };
     }
 
-    // Custom validation
     if (rule.custom && !rule.custom(value)) {
       return { isValid: false, error: rule.message };
     }
@@ -50,7 +45,6 @@ export const validateField = (value: string, rules: ValidationRule[]): Validatio
   return { isValid: true };
 };
 
-// Common validation rules
 export const validationRules = {
   required: (fieldName: string): ValidationRule => ({
     required: true,
@@ -105,7 +99,6 @@ export const validationRules = {
   }),
 };
 
-// Form validation helper
 export const validateForm = (
   formData: Record<string, string>,
   fieldRules: Record<string, ValidationRule[]>
@@ -125,7 +118,6 @@ export const validateForm = (
   return errors;
 };
 
-// Real-time validation hook
 export const useFormValidation = (
   initialData: Record<string, string>,
   fieldRules: Record<string, ValidationRule[]>
@@ -147,8 +139,7 @@ export const useFormValidation = (
 
   const handleFieldChange = (fieldName: string, value: string) => {
     setFormData(prev => ({ ...prev, [fieldName]: value }));
-    
-    // Validate on change if field has been touched
+
     if (touched[fieldName]) {
       validateSingleField(fieldName, value);
     }

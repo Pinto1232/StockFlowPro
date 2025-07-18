@@ -1,4 +1,4 @@
-// Environment Configuration for StockFlow Pro Mobile
+
 import { getCurrentEnvironment, getCurrentConfig, getBaseURL, type Environment } from './config';
 
 export interface EnvironmentInfo {
@@ -10,7 +10,6 @@ export interface EnvironmentInfo {
   isStaging: boolean;
 }
 
-// Get current environment information
 export const getEnvironmentInfo = (): EnvironmentInfo => {
   const environment = getCurrentEnvironment();
   const config = getCurrentConfig();
@@ -25,7 +24,6 @@ export const getEnvironmentInfo = (): EnvironmentInfo => {
   };
 };
 
-// Environment switching utilities (for development/testing)
 export class EnvironmentManager {
   private static instance: EnvironmentManager;
   private currentEnvironment: Environment;
@@ -49,7 +47,6 @@ export class EnvironmentManager {
     return getEnvironmentInfo();
   }
 
-  // For development purposes - switch environment
   switchEnvironment(environment: Environment): void {
     if (__DEV__) {
       this.currentEnvironment = environment;
@@ -63,12 +60,10 @@ export class EnvironmentManager {
     }
   }
 
-  // Get all available environments
   getAvailableEnvironments(): Environment[] {
     return ['development', 'staging', 'production'];
   }
 
-  // Check if current environment allows certain features
   canUseFeature(feature: string): boolean {
     const env = this.getEnvironmentInfo();
     
@@ -89,15 +84,12 @@ export class EnvironmentManager {
   }
 }
 
-// Export singleton instance
 export const environmentManager = EnvironmentManager.getInstance();
 
-// Utility functions
 export const isProduction = (): boolean => getEnvironmentInfo().isProduction;
 export const isDevelopment = (): boolean => getEnvironmentInfo().isDevelopment;
 export const isStaging = (): boolean => getEnvironmentInfo().isStaging;
 
-// Environment-specific logging
 export const envLog = (message: string, data?: any): void => {
   if (isDevelopment() || isStaging()) {
     // eslint-disable-next-line no-console

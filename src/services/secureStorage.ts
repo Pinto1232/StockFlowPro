@@ -1,5 +1,4 @@
-// Secure Storage Service for StockFlow Pro Mobile
-// This is a placeholder implementation - you should integrate with react-native-keychain or similar
+
 
 export interface SecureStorageService {
   setItem(key: string, value: string): Promise<void>;
@@ -8,7 +7,6 @@ export interface SecureStorageService {
   clear(): Promise<void>;
 }
 
-// Storage keys
 export const STORAGE_KEYS = {
   ACCESS_TOKEN: 'access_token',
   REFRESH_TOKEN: 'refresh_token',
@@ -18,7 +16,6 @@ export const STORAGE_KEYS = {
   LAST_LOGIN: 'last_login',
 } as const;
 
-// Mock implementation - Replace with actual secure storage
 class MockSecureStorage implements SecureStorageService {
   private storage: Map<string, string> = new Map();
 
@@ -57,50 +54,9 @@ class MockSecureStorage implements SecureStorageService {
 }
 
 // TODO: Replace with actual secure storage implementation
-// Example with react-native-keychain:
-/*
-import * as Keychain from 'react-native-keychain';
 
-class KeychainSecureStorage implements SecureStorageService {
-  private serviceName = 'StockFlowPro';
-
-  async setItem(key: string, value: string): Promise<void> {
-    await Keychain.setInternetCredentials(
-      `${this.serviceName}_${key}`,
-      key,
-      value
-    );
-  }
-
-  async getItem(key: string): Promise<string | null> {
-    try {
-      const credentials = await Keychain.getInternetCredentials(
-        `${this.serviceName}_${key}`
-      );
-      return credentials ? credentials.password : null;
-    } catch {
-      return null;
-    }
-  }
-
-  async removeItem(key: string): Promise<void> {
-    await Keychain.resetInternetCredentials(`${this.serviceName}_${key}`);
-  }
-
-  async clear(): Promise<void> {
-    // Clear all stored credentials
-    const keys = Object.values(STORAGE_KEYS);
-    await Promise.all(
-      keys.map(key => this.removeItem(key))
-    );
-  }
-}
-*/
-
-// Create storage instance
 export const secureStorage: SecureStorageService = new MockSecureStorage();
 
-// Utility functions for common operations
 export const storeAuthTokens = async (
   accessToken: string,
   refreshToken?: string

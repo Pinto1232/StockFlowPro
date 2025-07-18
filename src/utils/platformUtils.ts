@@ -16,7 +16,7 @@ export const safeStopAnimation = (animatedValue: any) => {
       animatedValue.stopAnimation();
     }
   } catch (error) {
-    // Silently ignore cleanup errors, especially on web
+    
     if (__DEV__) {
       // eslint-disable-next-line no-console
       console.warn('Animation cleanup warning:', error);
@@ -101,7 +101,7 @@ export const getAnimationConfig = () => {
   if (isWeb) {
     return {
       useNativeDriver: false, // Web doesn't support native driver for all properties
-      duration: 300, // Shorter durations for web
+      duration: 300, 
     };
   }
   

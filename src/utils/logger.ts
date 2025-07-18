@@ -1,4 +1,4 @@
-// Logger utility following Single Responsibility Principle
+
 
 export enum LogLevel {
   DEBUG = 0,
@@ -53,12 +53,10 @@ export class Logger {
 
     this.logs.push(logEntry);
 
-    // Keep only the last maxLogs entries
     if (this.logs.length > this.maxLogs) {
       this.logs = this.logs.slice(-this.maxLogs);
     }
 
-    // Console output
     this.outputToConsole(logEntry);
   }
 

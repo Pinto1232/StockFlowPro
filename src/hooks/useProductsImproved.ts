@@ -1,7 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiService, type Product, type ProductFilters } from '../services/api';
 
-// Query Keys
 export const productKeys = {
   all: ['products'] as const,
   lists: () => [...productKeys.all, 'list'] as const,
@@ -12,13 +11,12 @@ export const productKeys = {
   lowStock: (threshold: number) => [...productKeys.all, 'lowStock', threshold] as const,
 };
 
-// Custom Hooks with improved error handling
 export const useProducts = (filters?: ProductFilters) => {
   return useQuery({
     queryKey: productKeys.list(filters || {}),
     queryFn: () => apiService.getProducts(filters),
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    gcTime: 10 * 60 * 1000, // 10 minutes
+    staleTime: 5 * 60 * 1000, 
+    gcTime: 10 * 60 * 1000, 
     retry: (failureCount, error) => {
       // Don't retry on auth errors (401, 403)
       if (error && typeof error === 'object' && 'response' in error) {
@@ -34,14 +32,14 @@ export const useProducts = (filters?: ProductFilters) => {
           return false;
         }
       }
-      // Retry up to 2 times for other errors
+      
       return failureCount < 2;
     },
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
-    // Enable background refetch but with longer intervals
+    
     refetchOnWindowFocus: false,
     refetchOnReconnect: true,
-    refetchInterval: false, // Disable automatic refetch
+    refetchInterval: false, 
   });
 };
 
@@ -67,9 +65,9 @@ export const useSearchProducts = (searchTerm: string, filters?: ProductFilters) 
   return useQuery({
     queryKey: productKeys.search(searchTerm),
     queryFn: () => apiService.searchProducts(searchTerm, filters),
-    enabled: searchTerm.length > 2, // Only search if term is longer than 2 characters
-    staleTime: 2 * 60 * 1000, // 2 minutes for search results
-    retry: 1, // Only retry once for search
+    enabled: searchTerm.length > 2, 
+    staleTime: 2 * 60 * 1000, 
+    retry: 1, 
   });
 };
 
@@ -90,7 +88,6 @@ export const useLowStockProducts = (threshold: number = 10) => {
   });
 };
 
-// Mutations with improved error handling
 export const useCreateProduct = () => {
   const queryClient = useQueryClient();
 
@@ -98,7 +95,7 @@ export const useCreateProduct = () => {
     mutationFn: (product: Omit<Product, 'id' | 'createdAt' | 'updatedAt'>) =>
       apiService.createProduct(product),
     onSuccess: () => {
-      // Invalidate and refetch products list
+      
       queryClient.invalidateQueries({ queryKey: productKeys.lists() });
     },
     onError: (error) => {
@@ -115,9 +112,9 @@ export const useUpdateProduct = () => {
     mutationFn: ({ id, product }: { id: string; product: Partial<Product> }) =>
       apiService.updateProduct(id, product),
     onSuccess: (data, variables) => {
-      // Invalidate and refetch products list
+      
       queryClient.invalidateQueries({ queryKey: productKeys.lists() });
-      // Update the specific product in cache
+      
       queryClient.invalidateQueries({ queryKey: productKeys.detail(variables.id) });
     },
     onError: (error) => {
@@ -133,9 +130,9 @@ export const useDeleteProduct = () => {
   return useMutation({
     mutationFn: (id: string) => apiService.deleteProduct(id),
     onSuccess: (data, id) => {
-      // Remove from cache
+      
       queryClient.removeQueries({ queryKey: productKeys.detail(id) });
-      // Invalidate lists
+      
       queryClient.invalidateQueries({ queryKey: productKeys.lists() });
     },
     onError: (error) => {
@@ -145,7 +142,6 @@ export const useDeleteProduct = () => {
   });
 };
 
-// Stock Movement Mutations
 export const useRecordStockMovement = () => {
   const queryClient = useQueryClient();
 
@@ -158,11 +154,11 @@ export const useRecordStockMovement = () => {
       reference?: string;
     }) => apiService.recordStockMovement(movement),
     onSuccess: (data, variables) => {
-      // Invalidate product details to refresh stock quantity
+      
       queryClient.invalidateQueries({ queryKey: productKeys.detail(variables.productId) });
-      // Invalidate products list
+      
       queryClient.invalidateQueries({ queryKey: productKeys.lists() });
-      // Invalidate low stock products
+      
       queryClient.invalidateQueries({ queryKey: productKeys.all });
     },
     onError: (error) => {
@@ -172,7 +168,6 @@ export const useRecordStockMovement = () => {
   });
 };
 
-// Utility function to prefetch product
 export const usePrefetchProduct = () => {
   const queryClient = useQueryClient();
 

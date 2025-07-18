@@ -161,7 +161,7 @@ const styles = StyleSheet.create({
     color: colors.surface,
     fontWeight: '600',
   },
-  // Compact styles
+  
   compactContainer: {
     flexDirection: 'row',
     alignItems: 'center',

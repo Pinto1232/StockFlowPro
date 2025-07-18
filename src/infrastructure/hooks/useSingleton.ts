@@ -1,6 +1,5 @@
 import { useRef } from 'react';
 
-// Generic singleton hook factory
 export function createSingletonHook<T>(factory: () => T): () => T {
   let instance: T | null = null;
   
@@ -19,7 +18,6 @@ export function createSingletonHook<T>(factory: () => T): () => T {
   };
 }
 
-// Singleton hook for global app state
 interface GlobalAppState {
   isInitialized: boolean;
   lastActiveTime: Date;
@@ -36,7 +34,6 @@ const createGlobalAppState = (): GlobalAppState => ({
 
 export const useGlobalAppState = createSingletonHook(createGlobalAppState);
 
-// Singleton hook for network status
 interface NetworkState {
   isOnline: boolean;
   connectionType: string;
@@ -53,7 +50,6 @@ const createNetworkState = (): NetworkState => ({
 
 export const useNetworkState = createSingletonHook(createNetworkState);
 
-// Singleton hook for authentication state
 interface AuthState {
   isAuthenticated: boolean;
   token: string | null;

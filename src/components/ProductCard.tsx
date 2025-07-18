@@ -42,8 +42,7 @@ interface ProductCardProps {
 
 export const ProductCard: React.FC<ProductCardProps> = ({ item, index, onPress }) => {
   const [isPressed, setIsPressed] = useState(false);
-  
-  // Animation values
+
   const scaleAnim = useRef(new Animated.Value(1)).current;
   const shadowAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(50)).current;
@@ -51,9 +50,8 @@ export const ProductCard: React.FC<ProductCardProps> = ({ item, index, onPress }
   const rotateAnim = useRef(new Animated.Value(0)).current;
   const shimmerAnim = useRef(new Animated.Value(0)).current;
 
-  // Entrance animation
   useEffect(() => {
-    const delay = index * 150; // Staggered animation
+    const delay = index * 150; 
 
     Animated.parallel([
       Animated.timing(slideAnim, {
@@ -76,7 +74,6 @@ export const ProductCard: React.FC<ProductCardProps> = ({ item, index, onPress }
       }),
     ]).start();
 
-    // Shimmer effect
     const shimmerAnimation = Animated.loop(
       Animated.sequence([
         Animated.timing(shimmerAnim, {
@@ -102,7 +99,6 @@ export const ProductCard: React.FC<ProductCardProps> = ({ item, index, onPress }
     };
   }, [index]);
 
-  // Press animations
   const handlePressIn = () => {
     setIsPressed(true);
     Animated.parallel([
@@ -137,7 +133,6 @@ export const ProductCard: React.FC<ProductCardProps> = ({ item, index, onPress }
     ]).start();
   };
 
-  // Dynamic colors based on stock status
   const getStatusColor = () => {
     if (item.stockStatusBadge === 'danger') return colors.error;
     if (item.stockStatusBadge === 'warning') return colors.warning;
@@ -148,19 +143,16 @@ export const ProductCard: React.FC<ProductCardProps> = ({ item, index, onPress }
 
   const statusColor = getStatusColor();
 
-  // Shimmer overlay interpolation
   const shimmerTranslateX = shimmerAnim.interpolate({
     inputRange: [0, 1],
     outputRange: [-screenWidth, screenWidth],
   });
 
-  // Rotation interpolation
   const rotateInterpolate = rotateAnim.interpolate({
     inputRange: [0, 1],
     outputRange: ['5deg', '0deg'],
   });
 
-  // Shadow interpolation
   const shadowOpacity = shadowAnim.interpolate({
     inputRange: [0, 1],
     outputRange: [0.1, 0.25],
@@ -195,7 +187,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ item, index, onPress }
           },
         ]}
       >
-        {/* Shimmer Effect Overlay */}
+        {}
         <View style={styles.shimmerContainer}>
           <Animated.View
             style={[
@@ -207,10 +199,10 @@ export const ProductCard: React.FC<ProductCardProps> = ({ item, index, onPress }
           />
         </View>
 
-        {/* Status Indicator */}
+        {}
         <View style={[styles.statusIndicator, { backgroundColor: statusColor }]} />
 
-        {/* Action Indicator - Top Right Position with Green Background */}
+        {}
         <Animated.View
           style={[
             styles.actionIndicator,
@@ -223,7 +215,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ item, index, onPress }
           <Text style={styles.actionIcon}>→</Text>
         </Animated.View>
 
-        {/* Card Header - Adjusted for top-right button */}
+        {}
         <View style={styles.cardHeader}>
           <View style={styles.titleRow}>
             <Text style={styles.productName} numberOfLines={2}>
@@ -247,14 +239,14 @@ export const ProductCard: React.FC<ProductCardProps> = ({ item, index, onPress }
           </View>
         </View>
 
-        {/* Description */}
+        {}
         {item.description && (
           <Text style={styles.productDescription} numberOfLines={3}>
             {item.description}
           </Text>
         )}
 
-        {/* Price and Stock Section */}
+        {}
         <View style={styles.detailsSection}>
           <View style={styles.priceContainer}>
             <Text style={styles.priceLabel}>Price</Text>
@@ -282,7 +274,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ item, index, onPress }
           </View>
         </View>
 
-        {/* Additional Info */}
+        {}
         {(item.stockStatus || item.priceRange) && (
           <View style={styles.extraInfo}>
             {item.stockStatus && (
@@ -308,7 +300,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ item, index, onPress }
           </View>
         )}
 
-        {/* Footer with dates - Updated to use available data */}
+        {}
         <View style={styles.cardFooter}>
           <View style={styles.dateInfo}>
             <Text style={styles.dateLabel}>Created</Text>
@@ -417,7 +409,7 @@ const styles = StyleSheet.create({
   },
   cardHeader: {
     marginBottom: spacing.md,
-    paddingRight: 44, // Make space for action indicator
+    paddingRight: 44, 
   },
   titleRow: {
     marginBottom: spacing.sm,

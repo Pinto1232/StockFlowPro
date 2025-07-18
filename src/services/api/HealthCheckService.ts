@@ -1,4 +1,4 @@
-// Health Check Service for StockFlow Pro Mobile
+
 import { apiClient } from './ApiClient';
 import { API_ENDPOINTS, getCurrentEnvironment } from '../config';
 
@@ -38,7 +38,6 @@ export class HealthCheckService {
     return HealthCheckService.instance;
   }
 
-  // Define health check strategies in order of preference
   private getHealthCheckStrategies() {
     return [
       {
@@ -68,7 +67,6 @@ export class HealthCheckService {
     ];
   }
 
-  // Perform a single health check attempt
   private async performHealthCheck(
     strategy: { name: string; endpoint: string; description: string },
     options: HealthCheckOptions = {}
@@ -91,7 +89,7 @@ export class HealthCheckService {
         timeout,
         retryAttempts,
         skipAuth,
-        enableLogging: false // Reduce noise in logs
+        enableLogging: false 
       });
 
       const responseTime = Date.now() - startTime;
@@ -142,7 +140,6 @@ export class HealthCheckService {
     }
   }
 
-  // Perform comprehensive health check with fallback strategies
   async checkHealth(options: HealthCheckOptions = {}): Promise<HealthCheckResult> {
     const strategies = this.getHealthCheckStrategies();
     let lastResult: HealthCheckResult | null = null;
@@ -161,7 +158,6 @@ export class HealthCheckService {
 
       lastResult = result;
 
-      // Stop trying if we hit a network/timeout error
       if (result.details?.error === 'AbortError' || 
           result.details?.message?.includes('timeout')) {
         // eslint-disable-next-line no-console
@@ -170,7 +166,6 @@ export class HealthCheckService {
       }
     }
 
-    // All strategies failed
     const finalResult = lastResult || {
       isHealthy: false,
       status: 'unhealthy' as const,
@@ -192,7 +187,6 @@ export class HealthCheckService {
     return finalResult;
   }
 
-  // Quick health check (uses last result if recent, otherwise performs new check)
   async quickHealthCheck(maxAge: number = 30000): Promise<HealthCheckResult> {
     if (this.lastHealthCheck) {
       const age = Date.now() - new Date(this.lastHealthCheck.timestamp).getTime();
@@ -206,12 +200,10 @@ export class HealthCheckService {
     return this.checkHealth({ timeout: 3000, retryAttempts: 0 });
   }
 
-  // Get the last health check result
   getLastHealthCheck(): HealthCheckResult | null {
     return this.lastHealthCheck;
   }
 
-  // Start periodic health checks
   startPeriodicHealthCheck(intervalMs: number = 60000): void {
     if (this.healthCheckInterval) {
       this.stopPeriodicHealthCheck();
@@ -229,14 +221,12 @@ export class HealthCheckService {
       }
     }, intervalMs);
 
-    // Perform initial health check
     this.quickHealthCheck().catch(error => {
       // eslint-disable-next-line no-console
       console.error('[HealthCheck] Initial health check failed:', error);
     });
   }
 
-  // Stop periodic health checks
   stopPeriodicHealthCheck(): void {
     if (this.healthCheckInterval) {
       clearInterval(this.healthCheckInterval);
@@ -246,12 +236,10 @@ export class HealthCheckService {
     }
   }
 
-  // Add listener for health check results
   addHealthCheckListener(listener: (result: HealthCheckResult) => void): void {
     this.healthCheckListeners.push(listener);
   }
 
-  // Remove listener
   removeHealthCheckListener(listener: (result: HealthCheckResult) => void): void {
     const index = this.healthCheckListeners.indexOf(listener);
     if (index > -1) {
@@ -259,7 +247,6 @@ export class HealthCheckService {
     }
   }
 
-  // Notify all listeners
   private notifyListeners(result: HealthCheckResult): void {
     this.healthCheckListeners.forEach(listener => {
       try {
@@ -271,12 +258,10 @@ export class HealthCheckService {
     });
   }
 
-  // Check if API is currently healthy based on last check
   isApiHealthy(): boolean {
     return this.lastHealthCheck?.isHealthy ?? false;
   }
 
-  // Get health status summary
   getHealthSummary(): {
     isHealthy: boolean;
     status: string;
@@ -295,7 +280,6 @@ export class HealthCheckService {
     };
   }
 
-  // Cleanup method
   cleanup(): void {
     this.stopPeriodicHealthCheck();
     this.healthCheckListeners = [];
@@ -303,8 +287,6 @@ export class HealthCheckService {
   }
 }
 
-// Export singleton instance
 export const healthCheckService = HealthCheckService.getInstance();
 
-// Export default
 export default healthCheckService;

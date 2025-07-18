@@ -1,7 +1,6 @@
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 
-// Define your navigation stack types for auction-specific navigation
 type AuctionStackParamList = {
   Home: undefined;
   AuctionDetails: { auctionId: string };

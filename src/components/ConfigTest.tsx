@@ -1,4 +1,4 @@
-// Configuration Test Component
+
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { 
@@ -92,7 +92,7 @@ export const ConfigTest: React.FC = () => {
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       <Text style={styles.title}>🔧 Configuration Test</Text>
       
-      {/* Environment Info */}
+      {}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Environment</Text>
         <View style={styles.infoRow}>
@@ -109,7 +109,7 @@ export const ConfigTest: React.FC = () => {
         </View>
       </View>
 
-      {/* API Configuration */}
+      {}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>API Configuration</Text>
         <View style={styles.infoRow}>
@@ -134,7 +134,7 @@ export const ConfigTest: React.FC = () => {
         </View>
       </View>
 
-      {/* Health Check */}
+      {}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Health Check</Text>
         <View style={styles.infoRow}>
@@ -146,7 +146,7 @@ export const ConfigTest: React.FC = () => {
         </TouchableOpacity>
       </View>
 
-      {/* API Tests */}
+      {}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>API Tests</Text>
         <Text style={styles.description}>
@@ -163,7 +163,7 @@ export const ConfigTest: React.FC = () => {
         </TouchableOpacity>
       </View>
 
-      {/* Instructions */}
+      {}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Instructions</Text>
         <Text style={styles.description}>

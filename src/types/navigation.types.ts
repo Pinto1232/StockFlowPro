@@ -1,4 +1,4 @@
-// Navigation types for React Navigation
+
 export type RootStackParamList = {
   Home: undefined;
   UserManagement: undefined;
@@ -13,13 +13,11 @@ export type BottomTabParamList = {
   Settings: undefined;
 };
 
-// Screen props types
 export interface ScreenProps {
-  navigation: any; // React Navigation navigation prop
-  route: any; // React Navigation route prop
+  navigation: any; 
+  route: any; 
 }
 
-// Navigation service interface
 export interface INavigationService {
   navigate(routeName: string, params?: any): void;
   goBack(): void;

@@ -29,25 +29,20 @@ export const UserDropdown: React.FC<UserDropdownProps> = ({ testID }) => {
   const dropdownAnim = useRef(new Animated.Value(0)).current;
   const rotateAnim = useRef(new Animated.Value(0)).current;
 
-  // Get user display name
   const getUserDisplayName = () => {
     if (!user) return 'User';
-    
-    // Try to use firstName and lastName first
+
     if (user.firstName && user.lastName) {
       return `${user.firstName} ${user.lastName}`;
     }
-    
-    // Fall back to name field
+
     if (user.name) {
       return user.name;
     }
-    
-    // Fall back to email if no name is available
+
     return user.email;
   };
 
-  // Get user initials for avatar
   const getUserInitials = () => {
     const displayName = getUserDisplayName();
     const names = displayName.split(' ');
@@ -110,11 +105,10 @@ export const UserDropdown: React.FC<UserDropdownProps> = ({ testID }) => {
       animateLogout();
       closeDropdown();
 
-      // Add a small delay for better UX
       await new Promise(resolve => setTimeout(resolve, 500));
       await logout();
     } catch (error) {
-      // Handle error with platform-specific alert
+      
       if (Platform.OS === 'web') {
         alert('Failed to logout. Please try again.');
       } else {
@@ -204,7 +198,7 @@ export const UserDropdown: React.FC<UserDropdownProps> = ({ testID }) => {
         />
       </TouchableOpacity>
 
-      {/* Dropdown Modal */}
+      {}
       <Modal
         visible={isDropdownVisible}
         transparent
@@ -226,7 +220,7 @@ export const UserDropdown: React.FC<UserDropdownProps> = ({ testID }) => {
                 },
               ]}
             >
-              {/* User Info Section */}
+              {}
               <View style={styles.userInfoSection}>
                 <View style={styles.userAvatarLarge}>
                   <Text style={styles.userInitialsLarge}>{getUserInitials()}</Text>
@@ -244,12 +238,12 @@ export const UserDropdown: React.FC<UserDropdownProps> = ({ testID }) => {
                 </View>
               </View>
 
-              {/* Divider */}
+              {}
               <View style={styles.divider} />
 
-              {/* Menu Items */}
+              {}
               <View style={styles.menuSection}>
-                {/* SignalR Connection Button */}
+                {}
                 <TouchableOpacity
                   style={[
                     styles.menuItem,
@@ -280,10 +274,10 @@ export const UserDropdown: React.FC<UserDropdownProps> = ({ testID }) => {
                   </View>
                 </TouchableOpacity>
 
-                {/* Divider */}
+                {}
                 <View style={styles.menuDivider} />
 
-                {/* Logout Button */}
+                {}
                 <TouchableOpacity
                   style={[
                     styles.menuItem,
@@ -364,10 +358,10 @@ const styles = StyleSheet.create({
   },
   dropdownContainer: {
     position: 'absolute',
-    top: Platform.OS === 'ios' ? 100 : 80, // Adjust based on header height
+    top: Platform.OS === 'ios' ? 100 : 80, 
     left: spacing.md,
     right: spacing.md,
-    width: undefined, // Allow full width
+    width: undefined, 
   },
   dropdownContent: {
     backgroundColor: colors.surface,

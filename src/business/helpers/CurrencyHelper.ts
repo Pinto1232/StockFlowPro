@@ -12,7 +12,7 @@ export class CurrencyHelper {
         maximumFractionDigits: 2,
       }).format(amount);
     } catch (error) {
-      // Fallback formatting
+      
       return `$${amount.toFixed(2)}`;
     }
   }
@@ -33,7 +33,7 @@ export class CurrencyHelper {
       }
       return this.formatCurrency(amount, currency, locale);
     } catch (error) {
-      // Fallback formatting
+      
       if (amount >= 1000000) {
         return `$${(amount / 1000000).toFixed(1)}M`;
       } else if (amount >= 1000) {
@@ -44,7 +44,7 @@ export class CurrencyHelper {
   }
 
   static parseCurrency(currencyString: string): number {
-    // Remove currency symbols and parse
+    
     const cleanString = currencyString.replace(/[^0-9.-]+/g, '');
     const parsed = parseFloat(cleanString);
     return isNaN(parsed) ? 0 : parsed;

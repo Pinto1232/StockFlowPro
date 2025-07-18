@@ -53,24 +53,23 @@ export const NetworkRequestContextProvider: React.FC<NetworkRequestContextProvid
   };
 
   useEffect(() => {
-    // In a real app, you would use NetInfo to monitor network status
+    
     // import NetInfo from '@react-native-async-storage/async-storage';
     
     const checkNetworkStatus = () => {
-      // Placeholder for network status check
+      
       setIsOnline(true);
     };
 
     checkNetworkStatus();
-    
-    // Set up network status listener
+
     const interval = setInterval(checkNetworkStatus, 5000);
     
     return () => {
       try {
         clearInterval(interval);
       } catch (error) {
-        // Ignore cleanup errors
+        
       }
     };
   }, []);

@@ -1,11 +1,9 @@
-// StockFlow Pro Mobile App Configuration
+
 import { Platform } from 'react-native';
 
-// Environment types
 export type Environment = 'development' | 'staging' | 'production';
 export type PlatformOS = 'android' | 'ios' | 'web' | 'windows' | 'macos' | 'default';
 
-// Configuration interfaces
 export interface ApiConfig {
   baseURL: string;
   timeout: number;
@@ -29,11 +27,10 @@ export interface EnvironmentConfig {
   production: PlatformConfigs;
 }
 
-// Base URLs from the web application
 export const BASE_URLS = {
   development: {
     api: 'http://localhost:5131/api',
-    web: 'http://localhost:5131', // Alternative: https://localhost:7181
+    web: 'http://localhost:5131', 
   },
   staging: {
     api: 'https://staging-api.stockflowpro.com/api',
@@ -45,18 +42,16 @@ export const BASE_URLS = {
   },
 } as const;
 
-// Platform-specific URL adjustments for mobile
 const getPlatformSpecificURL = (baseUrl: string, platform: PlatformOS): string => {
-  // For development localhost URLs, adjust for Android emulator
+  
   if (baseUrl.includes('localhost') && platform === 'android') {
     return baseUrl.replace('localhost', '10.0.2.2');
   }
   return baseUrl;
 };
 
-// Main configuration object
 export const APP_CONFIG: EnvironmentConfig = {
-  // Development configuration
+  
   development: {
     android: {
       baseURL: getPlatformSpecificURL(BASE_URLS.development.api, 'android'),
@@ -102,7 +97,6 @@ export const APP_CONFIG: EnvironmentConfig = {
     },
   },
 
-  // Staging configuration
   staging: {
     android: {
       baseURL: BASE_URLS.staging.api,
@@ -148,7 +142,6 @@ export const APP_CONFIG: EnvironmentConfig = {
     },
   },
 
-  // Production configuration
   production: {
     android: {
       baseURL: BASE_URLS.production.api,
@@ -195,9 +188,8 @@ export const APP_CONFIG: EnvironmentConfig = {
   },
 };
 
-// API Endpoints - consistent with web application
 export const API_ENDPOINTS = {
-  // Authentication
+  
   auth: {
     login: '/auth/login',
     logout: '/auth/logout',
@@ -209,7 +201,6 @@ export const API_ENDPOINTS = {
     resetPassword: '/auth/reset-password',
   },
 
-  // Users
   users: {
     list: '/users',
     byId: (id: string | number) => `/users/${id}`,
@@ -222,7 +213,6 @@ export const API_ENDPOINTS = {
     updateProfile: '/users/profile',
   },
 
-  // Products
   products: {
     list: '/products',
     byId: (id: string | number) => `/products/${id}`,
@@ -236,7 +226,6 @@ export const API_ENDPOINTS = {
     lowStock: '/products/low-stock',
   },
 
-  // Inventory
   inventory: {
     list: '/inventory',
     byId: (id: string | number) => `/inventory/${id}`,
@@ -245,7 +234,6 @@ export const API_ENDPOINTS = {
     reports: '/inventory/reports',
   },
 
-  // Orders
   orders: {
     list: '/orders',
     byId: (id: string | number) => `/orders/${id}`,
@@ -255,7 +243,6 @@ export const API_ENDPOINTS = {
     fulfill: (id: string | number) => `/orders/${id}/fulfill`,
   },
 
-  // Reports
   reports: {
     sales: '/reports/sales',
     inventory: '/reports/inventory',
@@ -263,14 +250,12 @@ export const API_ENDPOINTS = {
     export: '/reports/export',
   },
 
-  // Health & System
   health: {
     basic: '/health',
     detailed: '/health/detailed',
     version: '/health/version',
   },
 
-  // Notifications
   notifications: {
     list: '/notifications',
     markRead: (id: string | number) => `/notifications/${id}/read`,
@@ -279,7 +264,6 @@ export const API_ENDPOINTS = {
   },
 } as const;
 
-// HTTP Status Codes
 export const HTTP_STATUS = {
   OK: 200,
   CREATED: 201,
@@ -299,7 +283,6 @@ export const HTTP_STATUS = {
   GATEWAY_TIMEOUT: 504,
 } as const;
 
-// Error Messages
 export const ERROR_MESSAGES = {
   NETWORK_ERROR: 'Network connection failed. Please check your internet connection.',
   TIMEOUT_ERROR: 'Request timed out. Please try again.',
@@ -312,7 +295,6 @@ export const ERROR_MESSAGES = {
   OFFLINE_ERROR: 'You are currently offline. Please check your connection.',
 } as const;
 
-// Helper function to get platform key
 const getPlatformKey = (platformOS: typeof Platform.OS): keyof PlatformConfigs => {
   switch (platformOS) {
     case 'android':
@@ -330,21 +312,18 @@ const getPlatformKey = (platformOS: typeof Platform.OS): keyof PlatformConfigs =
   }
 };
 
-// Environment detection
 export const getCurrentEnvironment = (): Environment => {
-  // Check for environment variables first
+  
   if (process.env.NODE_ENV === 'production') {
     return 'production';
   }
   if (process.env.NODE_ENV === 'staging') {
     return 'staging';
   }
-  
-  // Default to development in debug mode
+
   return __DEV__ ? 'development' : 'production';
 };
 
-// Get current configuration based on environment and platform
 export const getCurrentConfig = (): ApiConfig => {
   const environment = getCurrentEnvironment();
   const platformKey = getPlatformKey(Platform.OS);
@@ -352,7 +331,6 @@ export const getCurrentConfig = (): ApiConfig => {
   return APP_CONFIG[environment][platformKey] || APP_CONFIG[environment].default;
 };
 
-// Helper functions
 export const getBaseURL = (): string => {
   return getCurrentConfig().baseURL;
 };
@@ -367,7 +345,6 @@ export const getPlatformConfig = (
   return APP_CONFIG[targetEnvironment][targetPlatform] || APP_CONFIG[targetEnvironment].default;
 };
 
-// Platform utilities
 export const PLATFORM_INFO = {
   isAndroid: Platform.OS === 'android',
   isIOS: Platform.OS === 'ios',
@@ -375,8 +352,7 @@ export const PLATFORM_INFO = {
   isWindows: Platform.OS === 'windows',
   isMacOS: Platform.OS === 'macos',
   current: Platform.OS,
-  
-  // Get appropriate localhost URL for current platform
+
   getLocalhostURL: (port: number = 5131, path: string = '/api'): string => {
     const baseUrl = Platform.OS === 'android' 
       ? `http://10.0.2.2:${port}` 
@@ -385,17 +361,14 @@ export const PLATFORM_INFO = {
   },
 } as const;
 
-// Security configuration
 export const SECURITY_CONFIG = {
-  // API Key should be stored securely (e.g., in Keychain/Keystore)
-  // Never hardcode sensitive data here
+
   enableSSLPinning: getCurrentEnvironment() === 'production',
   enableCertificateValidation: true,
   maxRetryAttempts: 3,
-  tokenRefreshThreshold: 300000, // 5 minutes in milliseconds
+  tokenRefreshThreshold: 300000, 
 } as const;
 
-// Feature flags
 export const FEATURE_FLAGS = {
   enableOfflineMode: true,
   enablePushNotifications: true,

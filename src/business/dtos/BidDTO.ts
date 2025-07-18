@@ -3,7 +3,7 @@ import { BidStatus } from '../enums/AppEnums';
 export interface CreateBidDTO {
   auctionId: string;
   amount: number;
-  maxBid?: number; // For automatic bidding
+  maxBid?: number; 
   isAutoBid?: boolean;
 }
 

@@ -27,7 +27,7 @@ describe('Validation', () => {
       
       expect(validateField('John Doe', rules).isValid).toBe(true);
       expect(validateField('Alice', rules).isValid).toBe(true);
-      expect(validateField('Jean-Pierre', rules).isValid).toBe(false); // Contains hyphen
+      expect(validateField('Jean-Pierre', rules).isValid).toBe(false); 
       
       expect(validateField('A', rules).isValid).toBe(false);
       expect(validateField('A'.repeat(51), rules).isValid).toBe(false);
@@ -37,9 +37,9 @@ describe('Validation', () => {
       const rules = [validationRules.password()];
       
       expect(validateField('Password123!', rules).isValid).toBe(true);
-      expect(validateField('password', rules).isValid).toBe(false); // No uppercase, number, special char
-      expect(validateField('PASSWORD', rules).isValid).toBe(false); // No lowercase, number, special char
-      expect(validateField('Pass1!', rules).isValid).toBe(false); // Too short
+      expect(validateField('password', rules).isValid).toBe(false); 
+      expect(validateField('PASSWORD', rules).isValid).toBe(false); 
+      expect(validateField('Pass1!', rules).isValid).toBe(false); 
     });
   });
 

@@ -44,21 +44,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
 
       try {
-        // Parse stored user data
-        const parsedUser = JSON.parse(storedUser);
         
-        // Try to verify session by making an authenticated request
+        const parsedUser = JSON.parse(storedUser);
+
         // Since your backend uses cookies, we'll try a simple API call to check if still authenticated
         try {
           const response = await apiService.healthCheck();
           
           if (response && response.success) {
-            // Session is still valid, restore user
+            
             setUser(parsedUser);
             // eslint-disable-next-line no-console
             console.log('[AuthContext] Health check passed, user session restored');
           } else {
-            // Session expired, clear stored data
+            
             // eslint-disable-next-line no-console
             console.warn('[AuthContext] Health check failed, clearing auth data:', response);
             await clearAuthData();
@@ -66,10 +65,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         } catch (healthError) {
           // eslint-disable-next-line no-console
           console.warn('[AuthContext] Health check failed, but keeping user session for development:', healthError);
-          
-          // In development, if health check fails but we have stored user data,
+
           // we'll keep the user logged in to avoid constant re-authentication
-          // This is helpful when the backend server might not be running
+          
           setUser(parsedUser);
         }
       } catch (error) {
@@ -91,15 +89,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // Clear any stored auth tokens (though we're using cookies)
     apiService.clearAuthTokens();
     await AsyncStorage.removeItem('user');
-    // Reset launch flag so splash screen shows on next app start after logout
+    
     await AsyncStorage.removeItem('hasLaunchedBefore');
   };
 
   const login = async (username: string, password: string): Promise<boolean> => {
     try {
       setIsLoading(true);
-      
-      // Debug: Log which service is being used
+
       // eslint-disable-next-line no-console
       console.log('[AuthContext] Using API service:', apiService.constructor.name);
       // eslint-disable-next-line no-console
@@ -111,10 +108,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const response = await apiService.login({ username, password });
       
       if (response.success && response.data) {
-        // Extract user data from response
-        const userData = response.data.user || response.data;
         
-        // Create user object with expected structure
+        const userData = response.data.user || response.data;
+
         const user: User = {
           id: userData.id || userData.userId || '1',
           name: userData.name || `${userData.firstName || ''} ${userData.lastName || ''}`.trim() || userData.email,
@@ -125,8 +121,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         };
         
         setUser(user);
-        
-        // Store user data locally (cookies are handled automatically by the browser/HTTP client)
+
         await AsyncStorage.setItem('user', JSON.stringify(user));
         
         return true;
@@ -145,13 +140,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const logout = async () => {
     try {
       setIsLoading(true);
-      
-      // Call logout API to invalidate session on server
+
       await apiService.logout();
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error('Logout error:', error);
-      // Continue with local logout even if server call fails
+      
     } finally {
       await clearAuthData();
       setIsLoading(false);
@@ -167,13 +161,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const response = await apiService.register(registerData);
       
       if (response.success && response.data) {
-        // Registration successful
+        
         return {
           success: true,
           message: response.data.message || response.message || 'Registration successful'
         };
       } else {
-        // Registration failed
+        
         return {
           success: false,
           message: response.message || 'Registration failed',
@@ -183,10 +177,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } catch (error: any) {
       // eslint-disable-next-line no-console
       console.error('Registration failed:', error);
-      
-      // Handle different types of errors
+
       if (error.response) {
-        // Server responded with error status
+        
         const { status, data } = error.response;
         
         if (status === 409) {
@@ -230,7 +223,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       // Since your backend uses cookies, we can't easily refresh user data
       // without a dedicated endpoint. For now, we'll keep the existing user data.
-      // You could add a GET /api/auth/user endpoint to your backend for this.
+      
       // eslint-disable-next-line no-console
       console.log('User refresh not implemented - backend uses cookie auth');
     } catch (error) {

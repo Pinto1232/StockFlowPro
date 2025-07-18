@@ -4,7 +4,6 @@ import { useEnvironment } from '../infrastructure/providers/EnvironmentProvider'
 import { useAuth } from '../contexts/AuthContext';
 import { Logger } from '../utils';
 
-// Single Responsibility Principle - This screen only handles settings
 export const SettingsScreen: React.FC = () => {
   const { config, isDevelopment } = useEnvironment();
   const { user, logout, isLoading } = useAuth();
@@ -73,7 +72,7 @@ export const SettingsScreen: React.FC = () => {
       <View style={styles.content}>
         <Text style={styles.title}>Settings</Text>
 
-        {/* User Authentication */}
+        {}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Account</Text>
           {user && (
@@ -103,7 +102,7 @@ export const SettingsScreen: React.FC = () => {
           </TouchableOpacity>
         </View>
 
-        {/* Environment Configuration */}
+        {}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Environment</Text>
           <View style={styles.configItem}>
@@ -130,7 +129,7 @@ export const SettingsScreen: React.FC = () => {
           </View>
         </View>
 
-        {/* Feature Flags */}
+        {}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Feature Flags</Text>
           <View style={styles.configItem}>
@@ -147,7 +146,7 @@ export const SettingsScreen: React.FC = () => {
           </View>
         </View>
 
-        {/* Logging */}
+        {}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Logging</Text>
           <View style={styles.buttonRow}>
@@ -168,7 +167,7 @@ export const SettingsScreen: React.FC = () => {
           </View>
         </View>
 
-        {/* App Info */}
+        {}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Application Info</Text>
           <View style={styles.infoItem}>

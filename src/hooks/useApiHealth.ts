@@ -1,4 +1,4 @@
-// React Hook for API Health Monitoring
+
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { healthCheckService, type HealthCheckResult } from '../services/api/HealthCheckService';
 
@@ -14,23 +14,23 @@ export interface ApiHealthState {
 }
 
 export interface UseApiHealthOptions {
-  // Auto-start health monitoring when hook mounts
+  
   autoStart?: boolean;
-  // Interval for periodic health checks (in milliseconds)
+  
   checkInterval?: number;
-  // Maximum age of cached health check result (in milliseconds)
+  
   maxCacheAge?: number;
-  // Enable detailed logging
+  
   enableLogging?: boolean;
-  // Callback when health status changes
+  
   onHealthChange?: (isHealthy: boolean, result: HealthCheckResult) => void;
 }
 
 export const useApiHealth = (options: UseApiHealthOptions = {}) => {
   const {
     autoStart = true,
-    checkInterval = 60000, // 1 minute
-    maxCacheAge = 30000, // 30 seconds
+    checkInterval = 60000, 
+    maxCacheAge = 30000, 
     enableLogging = false,
     onHealthChange
   } = options;
@@ -49,12 +49,10 @@ export const useApiHealth = (options: UseApiHealthOptions = {}) => {
   const onHealthChangeRef = useRef(onHealthChange);
   const isMonitoringRef = useRef(false);
 
-  // Update ref when callback changes
   useEffect(() => {
     onHealthChangeRef.current = onHealthChange;
   }, [onHealthChange]);
 
-  // Health check listener
   const handleHealthCheckResult = useCallback((result: HealthCheckResult) => {
     if (enableLogging) {
       // eslint-disable-next-line no-console
@@ -79,7 +77,7 @@ export const useApiHealth = (options: UseApiHealthOptions = {}) => {
         prevState.status !== newState.status ||
         prevState.endpoint !== newState.endpoint
       ) {
-        // Call the health change callback
+        
         if (onHealthChangeRef.current) {
           try {
             onHealthChangeRef.current(result.isHealthy, result);
@@ -94,7 +92,6 @@ export const useApiHealth = (options: UseApiHealthOptions = {}) => {
     });
   }, [enableLogging]);
 
-  // Manual health check
   const checkHealth = useCallback(async (force: boolean = false): Promise<HealthCheckResult> => {
     setHealthState(prev => ({ ...prev, isLoading: true, status: 'checking' }));
 
@@ -128,10 +125,9 @@ export const useApiHealth = (options: UseApiHealthOptions = {}) => {
     }
   }, [maxCacheAge, enableLogging, handleHealthCheckResult]);
 
-  // Start monitoring
   const startMonitoring = useCallback(() => {
     if (isMonitoringRef.current) {
-      return; // Already monitoring
+      return; 
     }
 
     if (enableLogging) {
@@ -141,20 +137,16 @@ export const useApiHealth = (options: UseApiHealthOptions = {}) => {
 
     isMonitoringRef.current = true;
 
-    // Add listener for health check results
     healthCheckService.addHealthCheckListener(handleHealthCheckResult);
 
-    // Start periodic health checks
     healthCheckService.startPeriodicHealthCheck(checkInterval);
 
-    // Perform initial health check
     checkHealth(false);
   }, [checkInterval, enableLogging, handleHealthCheckResult, checkHealth]);
 
-  // Stop monitoring
   const stopMonitoring = useCallback(() => {
     if (!isMonitoringRef.current) {
-      return; // Not monitoring
+      return; 
     }
 
     if (enableLogging) {
@@ -164,36 +156,29 @@ export const useApiHealth = (options: UseApiHealthOptions = {}) => {
 
     isMonitoringRef.current = false;
 
-    // Remove listener
     healthCheckService.removeHealthCheckListener(handleHealthCheckResult);
 
-    // Stop periodic health checks
     healthCheckService.stopPeriodicHealthCheck();
   }, [enableLogging, handleHealthCheckResult]);
 
-  // Get health summary
   const getHealthSummary = useCallback(() => {
     return healthCheckService.getHealthSummary();
   }, []);
 
-  // Check if API is currently healthy
   const isApiHealthy = useCallback(() => {
     return healthCheckService.isApiHealthy();
   }, []);
 
-  // Auto-start monitoring on mount
   useEffect(() => {
     if (autoStart) {
       startMonitoring();
     }
 
-    // Cleanup on unmount
     return () => {
       stopMonitoring();
     };
   }, [autoStart, startMonitoring, stopMonitoring]);
 
-  // Load initial state from service
   useEffect(() => {
     const lastResult = healthCheckService.getLastHealthCheck();
     if (lastResult) {
@@ -202,24 +187,20 @@ export const useApiHealth = (options: UseApiHealthOptions = {}) => {
   }, [handleHealthCheckResult]);
 
   return {
-    // Health state
-    ...healthState,
     
-    // Actions
+    ...healthState,
+
     checkHealth,
     startMonitoring,
     stopMonitoring,
-    
-    // Utilities
+
     getHealthSummary,
     isApiHealthy,
-    
-    // Status helpers
+
     isMonitoring: isMonitoringRef.current,
     isOnline: healthState.isHealthy,
     hasError: !!healthState.error,
-    
-    // Formatted data
+
     lastCheckFormatted: healthState.lastCheck 
       ? new Date(healthState.lastCheck).toLocaleString()
       : null,
