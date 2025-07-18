@@ -17,6 +17,7 @@ import {
   getAuthTokens, 
   clearAuthTokens 
 } from '../secureStorage';
+import { LoginResponseDTO } from '../../business/dtos/UserDTO';
 
 // Example 1: Basic API calls
 export const exampleApiUsage = async () => {
@@ -26,7 +27,7 @@ export const exampleApiUsage = async () => {
     envLog('API Health Check:', isHealthy);
 
     // Login example
-    const loginResponse = await apiClient.post(API_ENDPOINTS.auth.login, {
+    const loginResponse = await apiClient.post<LoginResponseDTO>(API_ENDPOINTS.auth.login, {
       email: 'user@example.com',
       password: 'password123'
     });
@@ -34,13 +35,13 @@ export const exampleApiUsage = async () => {
     if (loginResponse.success) {
       // Store tokens securely
       await storeAuthTokens(
-        loginResponse.data.accessToken,
+        loginResponse.data.token,
         loginResponse.data.refreshToken
       );
 
       // Set tokens in API client
       apiClient.setAuthTokens(
-        loginResponse.data.accessToken,
+        loginResponse.data.token,
         loginResponse.data.refreshToken
       );
 
@@ -52,6 +53,7 @@ export const exampleApiUsage = async () => {
     envLog('Products:', productsResponse.data);
 
   } catch (error) {
+    // eslint-disable-next-line no-console
     console.error('API Error:', error);
   }
 };
@@ -112,6 +114,7 @@ export const exampleTokenManagement = async () => {
     envLog('Tokens cleared');
 
   } catch (error) {
+    // eslint-disable-next-line no-console
     console.error('Token management error:', error);
   }
 };
@@ -163,6 +166,7 @@ export const exampleFileUpload = async (file: FormData) => {
     envLog('File upload successful:', response.data);
     return response.data;
   } catch (error) {
+    // eslint-disable-next-line no-console
     console.error('File upload failed:', error);
     throw error;
   }
