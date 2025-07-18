@@ -230,14 +230,25 @@ class ApiService {
     return apiClient.post(API_ENDPOINTS.auth.register, registerData);
   }
 
-  // Note: Your backend uses cookie-based auth, so these JWT methods are not needed
-  // async checkSession(): Promise<ApiResponse<{ user: any; isValid: boolean }>> {
-  //   return apiClient.get(API_ENDPOINTS.auth.session);
-  // }
+  async verifyToken(): Promise<ApiResponse<{ user: any; valid: boolean }>> {
+    return apiClient.get(API_ENDPOINTS.auth.check);
+  }
 
-  // async refreshToken(): Promise<ApiResponse<{ accessToken: string; refreshToken?: string }>> {
-  //   return apiClient.post(API_ENDPOINTS.auth.refresh);
-  // }
+  async getUserProfile(): Promise<ApiResponse<any>> {
+    return apiClient.get(API_ENDPOINTS.users.profile);
+  }
+
+  async updateUserProfile(profile: any): Promise<ApiResponse<any>> {
+    return apiClient.put(API_ENDPOINTS.users.updateProfile, profile);
+  }
+
+  async refreshToken(): Promise<ApiResponse<{ accessToken: string; refreshToken?: string }>> {
+    return apiClient.post(API_ENDPOINTS.auth.refresh);
+  }
+
+  async checkSession(): Promise<ApiResponse<{ user: any; isValid: boolean }>> {
+    return apiClient.get(API_ENDPOINTS.auth.session);
+  }
 
   // Product Methods
   async getProducts(filters?: ProductFilters): Promise<ApiResponse<{ products: Product[]; total: number; page: number; totalPages: number }>> {

@@ -91,6 +91,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // Clear any stored auth tokens (though we're using cookies)
     apiService.clearAuthTokens();
     await AsyncStorage.removeItem('user');
+    // Reset launch flag so splash screen shows on next app start after logout
+    await AsyncStorage.removeItem('hasLaunchedBefore');
   };
 
   const login = async (username: string, password: string): Promise<boolean> => {

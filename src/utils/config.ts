@@ -1,7 +1,26 @@
 // React Native API Configuration for StockFlow Pro
 import { Platform } from 'react-native';
 
-export const API_CONFIG = {
+interface PlatformConfig {
+  baseURL: string;
+  timeout: number;
+  retryAttempts: number;
+  retryDelay: number;
+}
+
+interface EnvironmentConfig {
+  android: PlatformConfig;
+  ios: PlatformConfig;
+  web: PlatformConfig;
+  default: PlatformConfig;
+}
+
+interface ApiConfig {
+  development: EnvironmentConfig;
+  production: EnvironmentConfig;
+}
+
+export const API_CONFIG: ApiConfig = {
   // Development configuration
   development: {
     // Platform-specific base URLs for development
@@ -76,24 +95,24 @@ export const ENDPOINTS = {
   // Users
   users: {
     list: '/api/users',
-    byId: (id) => `/api/users/${id}`,
-    byEmail: (email) => `/api/users/by-email/${email}`,
+    byId: (id: string | number) => `/api/users/${id}`,
+    byEmail: (email: string) => `/api/users/by-email/${email}`,
     search: '/api/users/search',
     create: '/api/users',
-    update: (id) => `/api/users/${id}`,
-    delete: (id) => `/api/users/${id}`,
+    update: (id: string | number) => `/api/users/${id}`,
+    delete: (id: string | number) => `/api/users/${id}`,
   },
   
   // Products
   products: {
     list: '/api/products',
-    byId: (id) => `/api/products/${id}`,
+    byId: (id: string | number) => `/api/products/${id}`,
     search: '/api/products/search',
     dashboardStats: '/api/products/dashboard-stats',
     create: '/api/products',
-    update: (id) => `/api/products/${id}`,
-    updateStock: (id) => `/api/products/${id}/stock`,
-    delete: (id) => `/api/products/${id}`,
+    update: (id: string | number) => `/api/products/${id}`,
+    updateStock: (id: string | number) => `/api/products/${id}/stock`,
+    delete: (id: string | number) => `/api/products/${id}`,
   },
   
   // Health
@@ -126,12 +145,12 @@ export const ERROR_MESSAGES = {
 };
 
 // Get current environment configuration based on platform
-export const getCurrentConfig = () => {
+export const getCurrentConfig = (): PlatformConfig => {
   const isDevelopment = __DEV__;
-  const environment = isDevelopment ? 'development' : 'production';
+  const environment: keyof ApiConfig = isDevelopment ? 'development' : 'production';
   
   // Detect platform
-  let platform = 'default';
+  let platform: keyof EnvironmentConfig = 'default';
   
   if (Platform.OS === 'android') {
     platform = 'android';
@@ -146,15 +165,15 @@ export const getCurrentConfig = () => {
 };
 
 // Helper function to get base URL for current platform
-export const getBaseURL = () => {
+export const getBaseURL = (): string => {
   return getCurrentConfig().baseURL;
 };
 
 // Helper function to get platform-specific configuration
-export const getPlatformConfig = (platform = null) => {
+export const getPlatformConfig = (platform: keyof EnvironmentConfig | null = null): PlatformConfig => {
   const isDevelopment = __DEV__;
-  const environment = isDevelopment ? 'development' : 'production';
-  const targetPlatform = platform || Platform.OS || 'default';
+  const environment: keyof ApiConfig = isDevelopment ? 'development' : 'production';
+  const targetPlatform: keyof EnvironmentConfig = platform || (Platform.OS as keyof EnvironmentConfig) || 'default';
   
   return API_CONFIG[environment][targetPlatform] || API_CONFIG[environment].default;
 };

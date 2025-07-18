@@ -95,7 +95,7 @@ const styles = StyleSheet.create({
     marginBottom: spacing.sm,
   },
   userName: {
-    ...typography.textStyles.subtitle,
+    ...typography.textStyles.h4,
     color: colors.textPrimary,
     fontWeight: '500',
     marginBottom: spacing.xs,

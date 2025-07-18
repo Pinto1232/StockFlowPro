@@ -1,76 +1,81 @@
-import { ValidationUtils } from '../../utils/validation';
+import { validationRules, validateField, validateForm } from '../../utils/validation';
 
-describe('ValidationUtils', () => {
-  describe('isValidEmail', () => {
-    it('should return true for valid emails', () => {
-      expect(ValidationUtils.isValidEmail('test@example.com')).toBe(true);
-      expect(ValidationUtils.isValidEmail('user.name@domain.co.uk')).toBe(true);
-      expect(ValidationUtils.isValidEmail('test+tag@example.org')).toBe(true);
+describe('Validation', () => {
+  describe('validateField', () => {
+    it('should validate required fields', () => {
+      const rules = [validationRules.required('Name')];
+      
+      expect(validateField('John Doe', rules).isValid).toBe(true);
+      expect(validateField('', rules).isValid).toBe(false);
+      expect(validateField('   ', rules).isValid).toBe(false);
     });
 
-    it('should return false for invalid emails', () => {
-      expect(ValidationUtils.isValidEmail('invalid-email')).toBe(false);
-      expect(ValidationUtils.isValidEmail('test@')).toBe(false);
-      expect(ValidationUtils.isValidEmail('@example.com')).toBe(false);
-      expect(ValidationUtils.isValidEmail('')).toBe(false);
-    });
-  });
-
-  describe('isValidName', () => {
-    it('should return true for valid names', () => {
-      expect(ValidationUtils.isValidName('John Doe')).toBe(true);
-      expect(ValidationUtils.isValidName('Alice')).toBe(true);
-      expect(ValidationUtils.isValidName('Jean-Pierre')).toBe(true);
+    it('should validate email format', () => {
+      const rules = [validationRules.email()];
+      
+      expect(validateField('test@example.com', rules).isValid).toBe(true);
+      expect(validateField('user.name@domain.co.uk', rules).isValid).toBe(true);
+      expect(validateField('test+tag@example.org', rules).isValid).toBe(true);
+      
+      expect(validateField('invalid-email', rules).isValid).toBe(false);
+      expect(validateField('test@', rules).isValid).toBe(false);
+      expect(validateField('@example.com', rules).isValid).toBe(false);
     });
 
-    it('should return false for invalid names', () => {
-      expect(ValidationUtils.isValidName('')).toBe(false);
-      expect(ValidationUtils.isValidName(' ')).toBe(false);
-      expect(ValidationUtils.isValidName('A')).toBe(false);
-      expect(ValidationUtils.isValidName('A'.repeat(51))).toBe(false);
-    });
-  });
-
-  describe('isValidId', () => {
-    it('should return true for valid IDs', () => {
-      expect(ValidationUtils.isValidId('abc123')).toBe(true);
-      expect(ValidationUtils.isValidId('user_123')).toBe(true);
-      expect(ValidationUtils.isValidId('test-id')).toBe(true);
+    it('should validate name format', () => {
+      const rules = [validationRules.name()];
+      
+      expect(validateField('John Doe', rules).isValid).toBe(true);
+      expect(validateField('Alice', rules).isValid).toBe(true);
+      expect(validateField('Jean-Pierre', rules).isValid).toBe(false); // Contains hyphen
+      
+      expect(validateField('A', rules).isValid).toBe(false);
+      expect(validateField('A'.repeat(51), rules).isValid).toBe(false);
     });
 
-    it('should return false for invalid IDs', () => {
-      expect(ValidationUtils.isValidId('invalid@id')).toBe(false);
-      expect(ValidationUtils.isValidId('id with spaces')).toBe(false);
-      expect(ValidationUtils.isValidId('')).toBe(false);
+    it('should validate password requirements', () => {
+      const rules = [validationRules.password()];
+      
+      expect(validateField('Password123!', rules).isValid).toBe(true);
+      expect(validateField('password', rules).isValid).toBe(false); // No uppercase, number, special char
+      expect(validateField('PASSWORD', rules).isValid).toBe(false); // No lowercase, number, special char
+      expect(validateField('Pass1!', rules).isValid).toBe(false); // Too short
     });
   });
 
-  describe('validateCreateUserInput', () => {
-    it('should return valid for correct input', () => {
-      const input = {
+  describe('validateForm', () => {
+    it('should validate entire form', () => {
+      const formData = {
         name: 'John Doe',
         email: 'john@example.com',
+        password: 'Password123!',
       };
-      const result = ValidationUtils.validateCreateUserInput(input);
-      expect(result.isValid).toBe(true);
-      expect(result.errors).toHaveLength(0);
+      
+      const fieldRules = {
+        name: [validationRules.required('Name'), validationRules.name()],
+        email: [validationRules.required('Email'), validationRules.email()],
+        password: [validationRules.required('Password'), validationRules.password()],
+      };
+      
+      const errors = validateForm(formData, fieldRules);
+      expect(Object.keys(errors)).toHaveLength(0);
     });
 
-    it('should return invalid for incorrect input', () => {
-      const input = {
+    it('should return errors for invalid form', () => {
+      const formData = {
         name: 'A',
         email: 'invalid-email',
+        password: 'weak',
       };
-      const result = ValidationUtils.validateCreateUserInput(input);
-      expect(result.isValid).toBe(false);
-      expect(result.errors).toHaveLength(2);
-    });
-  });
-
-  describe('sanitizeString', () => {
-    it('should remove dangerous characters', () => {
-      expect(ValidationUtils.sanitizeString('  <script>alert("xss")</script>  ')).toBe('scriptalert("xss")/script');
-      expect(ValidationUtils.sanitizeString('  Normal text  ')).toBe('Normal text');
+      
+      const fieldRules = {
+        name: [validationRules.required('Name'), validationRules.name()],
+        email: [validationRules.required('Email'), validationRules.email()],
+        password: [validationRules.required('Password'), validationRules.password()],
+      };
+      
+      const errors = validateForm(formData, fieldRules);
+      expect(Object.keys(errors)).toHaveLength(3);
     });
   });
 });

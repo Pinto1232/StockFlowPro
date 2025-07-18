@@ -193,6 +193,37 @@ class MockApiService {
     }, 'User registered successfully');
   }
 
+  async verifyToken(): Promise<ApiResponse<{ user: any; valid: boolean }>> {
+    await this.delay(300);
+    return this.createResponse({
+      user: { id: '1', email: 'test@example.com', name: 'Test User', role: 'admin' },
+      valid: true,
+    });
+  }
+
+  async getUserProfile(): Promise<ApiResponse<any>> {
+    await this.delay(400);
+    return this.createResponse({
+      id: '1',
+      email: 'test@example.com',
+      name: 'Test User',
+      role: 'admin',
+      firstName: 'Test',
+      lastName: 'User',
+      phoneNumber: '+1234567890',
+      createdAt: '2024-01-01T00:00:00Z',
+    });
+  }
+
+  async updateUserProfile(profile: any): Promise<ApiResponse<any>> {
+    await this.delay(600);
+    return this.createResponse({
+      ...profile,
+      id: '1',
+      updatedAt: new Date().toISOString(),
+    }, 'Profile updated successfully');
+  }
+
   async checkSession(): Promise<ApiResponse<{ user: any; isValid: boolean }>> {
     await this.delay(300);
     return this.createResponse({

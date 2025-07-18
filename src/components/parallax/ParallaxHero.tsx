@@ -31,17 +31,17 @@ export const ParallaxHero: React.FC<ParallaxHeroProps> = ({
     const hour = currentTime.getHours();
 
     if (hour >= 6 && hour < 12) {
-      // Morning - warm sunrise colors
-      return ['#FF9A8B', '#A8E6CF', '#FFD3A5'];
+      // Morning - light dark blue with warm accents
+      return ['#4A6FA5', '#6B8DD6', '#8BB8E8'];
     } else if (hour >= 12 && hour < 18) {
-      // Afternoon - bright blue sky
-      return ['#667eea', '#764ba2', '#f093fb'];
+      // Afternoon - light dark blue with purple and teal
+      return ['#5A7FC7', '#7B68EE', '#20B2AA'];
     } else if (hour >= 18 && hour < 22) {
-      // Evening - sunset colors
-      return ['#FF6B6B', '#4ECDC4', '#45B7D1'];
+      // Evening - light dark blue with coral and mint
+      return ['#4682B4', '#FF7F7F', '#98FB98'];
     } else {
-      // Night - deep blues and purples
-      return ['#2C3E50', '#4A00E0', '#8E2DE2'];
+      // Night - deeper blue with lavender and periwinkle
+      return ['#2F4F4F', '#9370DB', '#CCCCFF'];
     }
   };
 
