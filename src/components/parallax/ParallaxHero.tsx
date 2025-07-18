@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { View, StyleSheet, Animated, Dimensions } from 'react-native';
+import { View, StyleSheet, Animated, Dimensions, Text } from 'react-native';
 import { colors, spacing } from '../../theme';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
@@ -292,19 +292,25 @@ export const ParallaxHero: React.FC<ParallaxHeroProps> = ({
             styles.floatingButton,
             { backgroundColor: gradientColors[0] },
           ]}
-        />
+        >
+          <Text style={styles.buttonIcon}>📦</Text>
+        </Animated.View>
         <Animated.View
           style={[
             styles.floatingButton,
             { backgroundColor: gradientColors[1] },
           ]}
-        />
+        >
+          <Text style={styles.buttonIcon}>📋</Text>
+        </Animated.View>
         <Animated.View
           style={[
             styles.floatingButton,
             { backgroundColor: gradientColors[2] },
           ]}
-        />
+        >
+          <Text style={styles.buttonIcon}>🏪</Text>
+        </Animated.View>
       </Animated.View>
     </View>
   );
@@ -382,5 +388,11 @@ const styles = StyleSheet.create({
     borderRadius: 25,
     boxShadow: '0 4px 8px rgba(0, 0, 0, 0.3)',
     elevation: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  buttonIcon: {
+    fontSize: 20,
+    textAlign: 'center',
   },
 });
