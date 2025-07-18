@@ -27,8 +27,10 @@ import { safeStopAnimation, debounce } from '../utils/platformUtils';
 
 const { width: screenWidth } = Dimensions.get('window');
 const CARD_WIDTH = screenWidth - spacing.lg * 4;
+const INITIAL_PRODUCTS_COUNT = 2;
+const PRODUCTS_PER_LOAD = 2;
 
-// Enhanced component with bulletproof lifecycle management and dual data sources
+// Enhanced component with bulletproof lifecycle management and lazy loading
 const HomeScreenComponent: React.FC = () => {
   // Component state tracking with multiple layers of protection
   const mountedRef = useRef(true);
@@ -44,6 +46,12 @@ const HomeScreenComponent: React.FC = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedCard, setSelectedCard] = useState<any>(null);
   const [dataSource] = useState<'mock' | 'api' | 'both'>('api');
+
+  // Pagination state for products
+  const [displayedProductsCount, setDisplayedProductsCount] = useState(
+    INITIAL_PRODUCTS_COUNT
+  );
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
 
   // Animation values with proper initialization
   const fadeAnim = useRef(new Animated.Value(1)).current;
@@ -75,6 +83,21 @@ const HomeScreenComponent: React.FC = () => {
   const safeSetSelectedCard = useCallback((value: any) => {
     if (mountedRef.current && !cleanupExecutedRef.current) {
       setSelectedCard(value);
+    }
+  }, []);
+
+  const safeSetDisplayedProductsCount = useCallback(
+    (value: number | ((prev: number) => number)) => {
+      if (mountedRef.current && !cleanupExecutedRef.current) {
+        setDisplayedProductsCount(value);
+      }
+    },
+    []
+  );
+
+  const safeSetIsLoadingMore = useCallback((value: boolean) => {
+    if (mountedRef.current && !cleanupExecutedRef.current) {
+      setIsLoadingMore(value);
     }
   }, []);
 
@@ -168,7 +191,55 @@ const HomeScreenComponent: React.FC = () => {
       }
     : undefined;
 
-  
+  // Load more products function
+  const loadMoreProducts = useCallback(() => {
+    if (!mountedRef.current || cleanupExecutedRef.current || isLoadingMore)
+      return;
+
+    const allProducts = productsData?.data || [];
+    const currentCount = displayedProductsCount;
+    const remainingProducts = allProducts.length - currentCount;
+
+    if (remainingProducts <= 0) return;
+
+    safeSetIsLoadingMore(true);
+
+    // Simulate loading delay for better UX
+    setTimeout(() => {
+      if (mountedRef.current && !cleanupExecutedRef.current) {
+        const newCount = Math.min(
+          currentCount + PRODUCTS_PER_LOAD,
+          allProducts.length
+        );
+        safeSetDisplayedProductsCount(newCount);
+        safeSetIsLoadingMore(false);
+      }
+    }, 500);
+  }, [
+    displayedProductsCount,
+    productsData?.data,
+    isLoadingMore,
+    safeSetDisplayedProductsCount,
+    safeSetIsLoadingMore,
+  ]);
+
+  // Scroll handler to detect when user reaches near bottom
+  const handleScroll = useCallback(
+    (event: any) => {
+      const { contentOffset, contentSize, layoutMeasurement } =
+        event.nativeEvent;
+      const paddingToBottom = 100; // Trigger load more when 100px from bottom
+
+      if (
+        contentOffset.y + layoutMeasurement.height + paddingToBottom >=
+        contentSize.height
+      ) {
+        loadMoreProducts();
+      }
+    },
+    [loadMoreProducts]
+  );
+
   // Console logging for data
   useEffect(() => {
     if (!mountedRef.current) return;
@@ -200,7 +271,6 @@ const HomeScreenComponent: React.FC = () => {
     }
   }, [enhancedData, productsError, sourceErrors, dataSources]);
 
-  
   // Debounced refetch with mount check
   const debouncedRefetch = useMemo(
     () =>
@@ -212,7 +282,6 @@ const HomeScreenComponent: React.FC = () => {
     [refetchProducts]
   );
 
-  
   // Memoized navigation items to prevent unnecessary re-renders
   const navigationItems = useMemo(
     () => [
@@ -507,7 +576,10 @@ const HomeScreenComponent: React.FC = () => {
           showsVerticalScrollIndicator={false}
           onScroll={Animated.event(
             [{ nativeEvent: { contentOffset: { y: scrollY } } }],
-            { useNativeDriver: true }
+            {
+              useNativeDriver: true,
+              listener: handleScroll,
+            }
           )}
           scrollEventThrottle={16}
         >
@@ -551,7 +623,12 @@ const HomeScreenComponent: React.FC = () => {
                 <View style={styles.productsContainer}>
                   <View style={styles.productsHeader}>
                     <Text style={styles.productsCount}>
-                      {productsData.data?.length || 0} products found
+                      Showing{' '}
+                      {Math.min(
+                        displayedProductsCount,
+                        productsData.data?.length || 0
+                      )}{' '}
+                      of {productsData.data?.length || 0} products
                     </Text>
                     <TouchableOpacity
                       style={styles.refreshButton}
@@ -562,7 +639,10 @@ const HomeScreenComponent: React.FC = () => {
                   </View>
 
                   <FlatList
-                    data={productsData.data || []}
+                    data={(productsData.data || []).slice(
+                      0,
+                      displayedProductsCount
+                    )}
                     keyExtractor={(item: any, index: number) =>
                       item?.id || `empty-${index}`
                     }
@@ -688,6 +768,44 @@ const HomeScreenComponent: React.FC = () => {
                     maxToRenderPerBatch={5}
                     windowSize={10}
                   />
+
+                  {/* Load More Section - Discrete Design */}
+                  {productsData.data &&
+                    displayedProductsCount < productsData.data.length && (
+                      <View style={styles.loadMoreContainer}>
+                        {isLoadingMore ? (
+                          <View style={styles.loadingMoreContainer}>
+                            <ActivityIndicator
+                              size="small"
+                              color={colors.textSecondary}
+                            />
+                            <Text style={styles.loadingMoreText}>
+                              Loading...
+                            </Text>
+                          </View>
+                        ) : (
+                          <TouchableOpacity
+                            style={styles.loadMoreButton}
+                            onPress={loadMoreProducts}
+                          >
+                            <Text style={styles.loadMoreButtonText}>
+                              Load More
+                            </Text>
+                          </TouchableOpacity>
+                        )}
+                      </View>
+                    )}
+
+                  {/* Show completion message when all products are loaded */}
+                  {productsData.data &&
+                    displayedProductsCount >= productsData.data.length &&
+                    productsData.data.length > INITIAL_PRODUCTS_COUNT && (
+                      <View style={styles.completionContainer}>
+                        <Text style={styles.completionText}>
+                          ✅ All {productsData.data.length} products loaded
+                        </Text>
+                      </View>
+                    )}
                 </View>
               ) : (
                 <Text style={styles.noDataText}>No product data available</Text>
@@ -696,7 +814,7 @@ const HomeScreenComponent: React.FC = () => {
 
             {/* Navigation Info */}
             <View style={styles.card}>
-              <Text style={styles.cardTitle}>Navigation</Text>
+              {/*<Text style={styles.cardTitle}>Navigation</Text>*/}
               <Text style={styles.infoText}>
                 Explore the app using the modern tab navigation below:
               </Text>
@@ -973,22 +1091,6 @@ const styles = StyleSheet.create({
     marginBottom: spacing.xs,
     flex: 1,
   },
-  sectionSubtitle: {
-    ...typography.textStyles.body,
-    color: colors.textSecondary,
-    lineHeight: 20,
-  },
-  toggleButton: {
-    backgroundColor: colors.primary + '20',
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    borderRadius: borderRadius.sm,
-  },
-  toggleButtonText: {
-    ...typography.textStyles.caption,
-    color: colors.primary,
-    fontWeight: '600',
-  },
   section: {
     backgroundColor: colors.surface,
     padding: spacing.lg,
@@ -1144,29 +1246,50 @@ const styles = StyleSheet.create({
     fontStyle: 'italic',
     paddingVertical: spacing.xl,
   },
-  statsGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: spacing.md,
-  },
-  statCard: {
-    backgroundColor: colors.backgroundSecondary,
-    padding: spacing.lg,
-    borderRadius: borderRadius.md,
-    flex: 1,
-    minWidth: '45%',
+  // Discrete Load More styles
+  loadMoreContainer: {
+    marginTop: spacing.md,
     alignItems: 'center',
   },
-  statValue: {
-    ...typography.textStyles.h3,
-    color: colors.primary,
-    fontWeight: '700',
-    marginBottom: spacing.xs,
+  loadingMoreContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: spacing.sm,
   },
-  statLabel: {
+  loadingMoreText: {
     ...typography.textStyles.caption,
     color: colors.textSecondary,
+    marginLeft: spacing.xs,
+    fontSize: 12,
+  },
+  loadMoreButton: {
+    backgroundColor: 'transparent',
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    borderRadius: borderRadius.sm,
+    borderWidth: 1,
+    borderColor: colors.borderLight,
+  },
+  loadMoreButtonText: {
+    ...typography.textStyles.caption,
+    color: colors.textSecondary,
+    fontWeight: '500',
     textAlign: 'center',
+    fontSize: 12,
+  },
+  completionContainer: {
+    marginTop: spacing.md,
+    alignItems: 'center',
+    paddingVertical: spacing.sm,
+    backgroundColor: colors.success + '10',
+    borderRadius: borderRadius.sm,
+  },
+  completionText: {
+    ...typography.textStyles.caption,
+    color: colors.success,
+    fontWeight: '500',
+    textAlign: 'center',
+    fontSize: 12,
   },
   card: {
     backgroundColor: colors.surface,
