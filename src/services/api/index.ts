@@ -26,6 +26,8 @@ export type {
   DashboardStats, 
   ProductFilters, 
   LoginCredentials,
+  RegisterData,
+  RegisterResponse,
   StockMovement 
 } from './apiServiceMethods';
 

@@ -5,6 +5,8 @@ import {
   DashboardStats, 
   ApiResponse, 
   LoginCredentials,
+  RegisterData,
+  RegisterResponse,
   StockMovement 
 } from './apiServiceMethods';
 import { getCurrentConfig, getBaseURL, getCurrentEnvironment } from '../config';
@@ -118,7 +120,9 @@ class MockApiService {
     const config = getCurrentConfig();
     const environment = getCurrentEnvironment();
     
+    // eslint-disable-next-line no-console
     console.log(`[MockAPI] Request to ${getBaseURL()} (${environment} environment)`);
+    // eslint-disable-next-line no-console
     console.log(`[MockAPI] Config:`, { 
       timeout: config.timeout, 
       retryAttempts: config.retryAttempts,
@@ -137,13 +141,13 @@ class MockApiService {
   async login(credentials: LoginCredentials): Promise<ApiResponse<{ accessToken: string; refreshToken: string; user: any }>> {
     await this.delay();
     
-    if (credentials.email === 'test@example.com' && credentials.password === 'password') {
+    if (credentials.username === 'test@example.com' && credentials.password === 'password') {
       return this.createResponse({
         accessToken: 'mock-access-token',
         refreshToken: 'mock-refresh-token',
         user: {
           id: '1',
-          email: credentials.email,
+          email: credentials.username,
           name: 'Test User',
           role: 'admin',
         },
@@ -156,6 +160,37 @@ class MockApiService {
   async logout(): Promise<ApiResponse<void>> {
     await this.delay(200);
     return this.createResponse(undefined, 'Logout successful');
+  }
+
+  async register(registerData: RegisterData): Promise<ApiResponse<RegisterResponse>> {
+    await this.delay(800);
+    
+    // Simulate validation errors for testing
+    if (registerData.email === 'existing@example.com') {
+      const error = new Error('User already exists');
+      (error as any).response = {
+        status: 409,
+        data: {
+          message: 'User already exists with this email address',
+          errors: ['Email already registered']
+        }
+      };
+      throw error;
+    }
+    
+    // Simulate successful registration
+    const mockUser = {
+      id: `user-${Date.now()}`,
+      firstName: registerData.firstName,
+      lastName: registerData.lastName,
+      email: registerData.email,
+      role: 'User'
+    };
+    
+    return this.createResponse({
+      message: 'Registration successful',
+      user: mockUser
+    }, 'User registered successfully');
   }
 
   async checkSession(): Promise<ApiResponse<{ user: any; isValid: boolean }>> {
@@ -189,7 +224,7 @@ class MockApiService {
       filteredProducts = filteredProducts.filter(p => 
         p.name.toLowerCase().includes(searchTerm) ||
         p.description?.toLowerCase().includes(searchTerm) ||
-        p.sku.toLowerCase().includes(searchTerm)
+        p.sku?.toLowerCase().includes(searchTerm)
       );
     }
     
@@ -198,7 +233,7 @@ class MockApiService {
     }
     
     if (filters?.lowStock) {
-      filteredProducts = filteredProducts.filter(p => p.stockQuantity < p.minStockLevel);
+      filteredProducts = filteredProducts.filter(p => p.stockQuantity < (p.minStockLevel || 0));
     }
 
     return this.createResponse({
@@ -280,7 +315,7 @@ class MockApiService {
     return this.createResponse(undefined, 'Product deleted successfully');
   }
 
-  async updateProductStock(id: string, quantity: number, reason?: string): Promise<ApiResponse<Product>> {
+  async updateProductStock(id: string, quantity: number, _reason?: string): Promise<ApiResponse<Product>> {
     await this.delay(500);
     
     const product = mockProducts.find(p => p.id === id);
@@ -323,12 +358,12 @@ class MockApiService {
     }, 'Stock movement recorded');
   }
 
-  async getInventoryMovements(filters?: any): Promise<ApiResponse<any[]>> {
+  async getInventoryMovements(_filters?: any): Promise<ApiResponse<any[]>> {
     await this.delay(500);
     return this.createResponse([], 'No movements found');
   }
 
-  async getInventoryReport(params?: any): Promise<ApiResponse<any>> {
+  async getInventoryReport(_params?: any): Promise<ApiResponse<any>> {
     await this.delay(800);
     return this.createResponse({
       reportId: `report-${Date.now()}`,
@@ -338,7 +373,7 @@ class MockApiService {
   }
 
   // User Methods
-  async getUsers(filters?: any): Promise<ApiResponse<any[]>> {
+  async getUsers(_filters?: any): Promise<ApiResponse<any[]>> {
     await this.delay();
     return this.createResponse([
       { id: '1', name: 'Test User', email: 'test@example.com', role: 'admin' },
@@ -347,7 +382,9 @@ class MockApiService {
 
   async getUserById(id: string): Promise<ApiResponse<any>> {
     await this.delay();
-    return this.createResponse({ id, name: 'Test User', email: 'test@example.com' });
+    // Use the id parameter to return user data
+    const userData = { id: id, name: 'Test User', email: 'test@example.com' };
+    return this.createResponse(userData);
   }
 
   async createUser(user: any): Promise<ApiResponse<any>> {
@@ -360,7 +397,7 @@ class MockApiService {
     return this.createResponse({ ...user, id });
   }
 
-  async deleteUser(id: string): Promise<ApiResponse<void>> {
+  async deleteUser(_id: string): Promise<ApiResponse<void>> {
     await this.delay(400);
     return this.createResponse(undefined);
   }
@@ -383,7 +420,7 @@ class MockApiService {
     });
   }
 
-  async uploadFile(file: FormData, endpoint: string = '/upload'): Promise<ApiResponse<{ url: string; filename: string }>> {
+  async uploadFile(_file: FormData, _endpoint: string = '/upload'): Promise<ApiResponse<{ url: string; filename: string }>> {
     await this.delay(1200);
     return this.createResponse({
       url: 'https://example.com/uploads/file.jpg',
@@ -397,14 +434,17 @@ class MockApiService {
   }
 
   setAuthTokens(accessToken: string, refreshToken?: string): void {
+    // eslint-disable-next-line no-console
     console.log('[MockAPI] Auth tokens set:', { accessToken: '***', refreshToken: refreshToken ? '***' : undefined });
   }
 
   clearAuthTokens(): void {
+    // eslint-disable-next-line no-console
     console.log('[MockAPI] Auth tokens cleared');
   }
 
   updateConfig(): void {
+    // eslint-disable-next-line no-console
     console.log('[MockAPI] Configuration updated');
   }
 }

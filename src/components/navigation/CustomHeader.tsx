@@ -36,17 +36,16 @@ export const CustomHeader: React.FC<CustomHeaderProps> = ({
         <View style={[styles.header, { backgroundColor }]}>
           <View style={styles.leftSection}>
             {leftComponent}
-          </View>
-          
-          <View style={styles.centerSection}>
-            <Text style={[styles.title, { color: textColor }]} numberOfLines={1}>
-              {title}
-            </Text>
-            {subtitle && (
-              <Text style={[styles.subtitle, { color: textColor }]} numberOfLines={1}>
-                {subtitle}
+            <View style={styles.titleContainer}>
+              <Text style={[styles.title, { color: textColor }]} numberOfLines={1}>
+                {title}
               </Text>
-            )}
+              {subtitle && (
+                <Text style={[styles.subtitle, { color: textColor }]} numberOfLines={1}>
+                  {subtitle}
+                </Text>
+              )}
+            </View>
           </View>
           
           <View style={styles.rightSection}>
@@ -77,13 +76,12 @@ const styles = StyleSheet.create({
   },
   leftSection: {
     flex: 1,
-    alignItems: 'flex-start',
-    justifyContent: 'center',
-  },
-  centerSection: {
-    flex: 3,
+    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'flex-start',
+  },
+  titleContainer: {
+    marginLeft: spacing.sm,
   },
   rightSection: {
     flex: 1,
@@ -93,12 +91,12 @@ const styles = StyleSheet.create({
   title: {
     ...typography.textStyles.h4,
     color: colors.headerText,
-    textAlign: 'center',
+    textAlign: 'left',
   },
   subtitle: {
     ...typography.textStyles.bodySmall,
     color: colors.textSecondary,
-    textAlign: 'center',
+    textAlign: 'left',
     marginTop: 2,
   },
 });

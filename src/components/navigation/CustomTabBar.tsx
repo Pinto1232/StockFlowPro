@@ -21,13 +21,13 @@ interface TabIconProps {
 const TabIcon: React.FC<TabIconProps> = ({ routeName, focused, color, size }) => {
   const getIconName = (route: string, isFocused: boolean) => {
     switch (route) {
-      case 'HomeTab':
+      case 'Home':
         return isFocused ? 'home' : 'home-outline';
-      case 'UsersTab':
+      case 'Users':
         return isFocused ? 'people' : 'people-outline';
-      case 'CounterTab':
+      case 'Counter':
         return isFocused ? 'calculator' : 'calculator-outline';
-      case 'SettingsTab':
+      case 'Settings':
         return isFocused ? 'settings' : 'settings-outline';
       default:
         return 'circle-outline';

@@ -24,23 +24,35 @@ class MockSecureStorage implements SecureStorageService {
 
   async setItem(key: string, value: string): Promise<void> {
     this.storage.set(key, value);
-    console.log(`[SecureStorage] Stored item with key: ${key}`);
+    if (__DEV__) {
+      // eslint-disable-next-line no-console
+      console.log(`[SecureStorage] Stored item with key: ${key}`);
+    }
   }
 
   async getItem(key: string): Promise<string | null> {
     const value = this.storage.get(key) || null;
-    console.log(`[SecureStorage] Retrieved item with key: ${key}, exists: ${value !== null}`);
+    if (__DEV__) {
+      // eslint-disable-next-line no-console
+      console.log(`[SecureStorage] Retrieved item with key: ${key}, exists: ${value !== null}`);
+    }
     return value;
   }
 
   async removeItem(key: string): Promise<void> {
     this.storage.delete(key);
-    console.log(`[SecureStorage] Removed item with key: ${key}`);
+    if (__DEV__) {
+      // eslint-disable-next-line no-console
+      console.log(`[SecureStorage] Removed item with key: ${key}`);
+    }
   }
 
   async clear(): Promise<void> {
     this.storage.clear();
-    console.log('[SecureStorage] Cleared all items');
+    if (__DEV__) {
+      // eslint-disable-next-line no-console
+      console.log('[SecureStorage] Cleared all items');
+    }
   }
 }
 

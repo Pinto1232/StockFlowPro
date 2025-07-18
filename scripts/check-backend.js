@@ -9,6 +9,8 @@
  * Usage: node scripts/check-backend.js
  */
 
+/* eslint-disable no-console */
+
 const http = require('http');
 const https = require('https');
 

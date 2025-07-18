@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import {
   View,
   Text,
-  TextInput,
   TouchableOpacity,
   StyleSheet,
   Alert,
@@ -12,6 +11,8 @@ import {
   ScrollView,
 } from 'react-native';
 import { useAuth } from '../contexts/AuthContext';
+import { ModernInput } from '../components/forms';
+import { useFormValidation, validationRules } from '../utils/validation';
 import { colors, spacing, typography, borderRadius, shadows } from '../theme';
 
 interface LoginScreenProps {
@@ -19,29 +20,38 @@ interface LoginScreenProps {
 }
 
 export const LoginScreen: React.FC<LoginScreenProps> = ({ onSwitchToRegister }) => {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
   const [isLoggingIn, setIsLoggingIn] = useState(false);
-  
   const { login, isLoading } = useAuth();
 
+  // Form validation setup
+  const {
+    formData,
+    errors,
+    handleFieldChange,
+    handleFieldBlur,
+    validateAllFields,
+  } = useFormValidation(
+    { username: '', password: '' },
+    {
+      username: [validationRules.required('Username')],
+      password: [validationRules.required('Password')],
+    }
+  );
+
   const handleLogin = async () => {
-    if (!username.trim() || !password.trim()) {
-      Alert.alert('Error', 'Please enter both username and password');
+    if (!validateAllFields()) {
       return;
     }
 
     setIsLoggingIn(true);
     
     try {
-      const success = await login(username.trim(), password);
+      const success = await login(formData.username.trim(), formData.password);
       
-      if (success) {
-        Alert.alert('Success', 'Login successful!');
-        // Navigation will be handled by the app's auth state
-      } else {
+      if (!success) {
         Alert.alert('Error', 'Invalid username or password');
       }
+      // Success will be handled by auth state change
     } catch (error) {
       Alert.alert('Error', 'Login failed. Please try again.');
     } finally {
@@ -49,7 +59,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onSwitchToRegister }) 
     }
   };
 
-  const isButtonDisabled = isLoggingIn || isLoading || !username.trim() || !password.trim();
+  const isButtonDisabled = isLoggingIn || isLoading || !formData.username.trim() || !formData.password.trim();
 
   if (isLoading) {
     return (
@@ -76,34 +86,34 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onSwitchToRegister }) 
           </View>
 
           <View style={styles.form}>
-            <View style={styles.inputContainer}>
-              <Text style={styles.label}>Username</Text>
-              <TextInput
-                style={styles.input}
-                value={username}
-                onChangeText={setUsername}
-                placeholder="Enter your username"
-                placeholderTextColor={colors.textSecondary}
-                autoCapitalize="none"
-                autoCorrect={false}
-                editable={!isLoggingIn}
-              />
-            </View>
+            <ModernInput
+              label="Username"
+              value={formData.username}
+              onChangeText={(value) => handleFieldChange('username', value)}
+              onBlur={() => handleFieldBlur('username')}
+              error={errors.username}
+              leftIcon="person-outline"
+              placeholder="Enter your username"
+              autoCapitalize="none"
+              autoCorrect={false}
+              editable={!isLoggingIn}
+              required
+            />
 
-            <View style={styles.inputContainer}>
-              <Text style={styles.label}>Password</Text>
-              <TextInput
-                style={styles.input}
-                value={password}
-                onChangeText={setPassword}
-                placeholder="Enter your password"
-                placeholderTextColor={colors.textSecondary}
-                secureTextEntry
-                autoCapitalize="none"
-                autoCorrect={false}
-                editable={!isLoggingIn}
-              />
-            </View>
+            <ModernInput
+              label="Password"
+              value={formData.password}
+              onChangeText={(value) => handleFieldChange('password', value)}
+              onBlur={() => handleFieldBlur('password')}
+              error={errors.password}
+              leftIcon="lock-closed-outline"
+              placeholder="Enter your password"
+              isPassword
+              autoCapitalize="none"
+              autoCorrect={false}
+              editable={!isLoggingIn}
+              required
+            />
 
             <TouchableOpacity
               style={[styles.loginButton, isButtonDisabled && styles.loginButtonDisabled]}
@@ -175,25 +185,6 @@ const styles = StyleSheet.create({
   },
   form: {
     marginBottom: spacing.lg,
-  },
-  inputContainer: {
-    marginBottom: spacing.lg,
-  },
-  label: {
-    ...typography.textStyles.subtitle,
-    color: colors.textPrimary,
-    fontWeight: '600',
-    marginBottom: spacing.sm,
-  },
-  input: {
-    backgroundColor: colors.backgroundSecondary,
-    borderWidth: 1,
-    borderColor: colors.borderLight,
-    borderRadius: borderRadius.md,
-    padding: spacing.md,
-    ...typography.textStyles.body,
-    color: colors.textPrimary,
-    fontSize: 16,
   },
   loginButton: {
     backgroundColor: colors.primary,

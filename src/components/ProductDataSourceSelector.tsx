@@ -22,14 +22,13 @@ export const ProductDataSourceSelector: React.FC<ProductDataSourceSelectorProps>
   showProductCount = true,
 }) => {
   const [selectedSource, setSelectedSource] = useState<'mock' | 'api' | 'both'>('api');
-  const { healthStatus, checkHealth, isHealthy } = useProductSourcesHealth();
+  const { healthStatus, checkHealth } = useProductSourcesHealth();
   
   const {
     enhancedData,
     isLoading,
     error,
     switchDataSource,
-    currentDataSource,
     dataSources,
     sourceErrors,
   } = useProductsEnhanced({

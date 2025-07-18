@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { apiService } from '../services/api';
+import { apiService, RegisterData } from '../services/api';
 
 interface User {
   id: string;
@@ -15,6 +15,7 @@ interface AuthContextType {
   user: User | null;
   isLoading: boolean;
   login: (username: string, password: string) => Promise<boolean>;
+  register: (registerData: RegisterData) => Promise<{ success: boolean; message?: string; errors?: string[] }>;
   logout: () => Promise<void>;
   isAuthenticated: boolean;
   refreshUser: () => Promise<void>;
@@ -155,6 +156,72 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const register = async (registerData: RegisterData): Promise<{ success: boolean; message?: string; errors?: string[] }> => {
+    try {
+      // eslint-disable-next-line no-console
+      console.log('[AuthContext] Registering user:', { ...registerData, password: '***', confirmPassword: '***' });
+      
+      // Call your backend's register endpoint
+      const response = await apiService.register(registerData);
+      
+      if (response.success && response.data) {
+        // Registration successful
+        return {
+          success: true,
+          message: response.data.message || response.message || 'Registration successful'
+        };
+      } else {
+        // Registration failed
+        return {
+          success: false,
+          message: response.message || 'Registration failed',
+          errors: response.errors
+        };
+      }
+    } catch (error: any) {
+      // eslint-disable-next-line no-console
+      console.error('Registration failed:', error);
+      
+      // Handle different types of errors
+      if (error.response) {
+        // Server responded with error status
+        const { status, data } = error.response;
+        
+        if (status === 409) {
+          return {
+            success: false,
+            message: 'User already exists with this email address',
+            errors: data?.errors || ['Email already registered']
+          };
+        } else if (status === 400) {
+          return {
+            success: false,
+            message: data?.message || 'Invalid registration data',
+            errors: data?.errors || ['Please check your input and try again']
+          };
+        } else {
+          return {
+            success: false,
+            message: data?.message || 'Registration failed',
+            errors: data?.errors || ['Server error occurred']
+          };
+        }
+      } else if (error.message) {
+        return {
+          success: false,
+          message: error.message,
+          errors: [error.message]
+        };
+      } else {
+        return {
+          success: false,
+          message: 'Registration failed. Please try again.',
+          errors: ['Unknown error occurred']
+        };
+      }
+    }
+  };
+
   const refreshUser = async () => {
     try {
       if (!user) return;
@@ -174,6 +241,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     user,
     isLoading,
     login,
+    register,
     logout,
     isAuthenticated: !!user,
     refreshUser,

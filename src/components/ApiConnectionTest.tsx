@@ -28,7 +28,6 @@ export const ApiConnectionTest: React.FC<ApiConnectionTestProps> = ({
 
     try {
       // Test 1: Basic connectivity to backend
-      console.log('🧪 Testing backend API connectivity...');
       testResults.tests.push({
         name: 'Backend API Connectivity',
         endpoint: 'http://localhost:5131/api/products',
@@ -64,21 +63,14 @@ export const ApiConnectionTest: React.FC<ApiConnectionTestProps> = ({
           duration: Date.now() - testResults.tests[0].startTime,
         };
 
-        console.log('✅ Backend API Response:', {
-          status: response.status,
-          ok: response.ok,
-          data: parsedData,
-        });
-
       } catch (error) {
         testResults.tests[0] = {
           ...testResults.tests[0],
           status: 'error',
-          error: error.message,
+          error: error instanceof Error ? error.message : String(error),
           endTime: Date.now(),
           duration: Date.now() - testResults.tests[0].startTime,
         };
-        console.error('❌ Backend API Error:', error);
       }
 
       // Test 2: Health check endpoint
@@ -121,7 +113,7 @@ export const ApiConnectionTest: React.FC<ApiConnectionTestProps> = ({
         testResults.tests[1] = {
           ...testResults.tests[1],
           status: 'error',
-          error: error.message,
+          error: error instanceof Error ? error.message : String(error),
           endTime: Date.now(),
           duration: Date.now() - testResults.tests[1].startTime,
         };
@@ -163,7 +155,7 @@ export const ApiConnectionTest: React.FC<ApiConnectionTestProps> = ({
         testResults.tests[2] = {
           ...testResults.tests[2],
           status: 'warning',
-          error: error.message,
+          error: error instanceof Error ? error.message : String(error),
           note: 'CORS preflight may not be required for simple requests',
           endTime: Date.now(),
           duration: Date.now() - testResults.tests[2].startTime,
@@ -171,7 +163,7 @@ export const ApiConnectionTest: React.FC<ApiConnectionTestProps> = ({
       }
 
     } catch (error) {
-      console.error('❌ Test suite error:', error);
+      // Silently handle test suite errors - results will show the issue
     }
 
     setResults(testResults);
@@ -286,7 +278,7 @@ export const ApiConnectionTest: React.FC<ApiConnectionTestProps> = ({
                   <Text style={styles.corsTitle}>CORS Headers:</Text>
                   {Object.entries(test.corsHeaders).map(([key, value]) => (
                     <Text key={key} style={styles.corsHeader}>
-                      {key}: {value || 'Not set'}
+                      {`${key}: ${value || 'Not set'}`}
                     </Text>
                   ))}
                 </View>

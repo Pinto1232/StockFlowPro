@@ -53,9 +53,12 @@ export class EnvironmentManager {
   switchEnvironment(environment: Environment): void {
     if (__DEV__) {
       this.currentEnvironment = environment;
+      // eslint-disable-next-line no-console
       console.log(`[EnvironmentManager] Switched to ${environment} environment`);
+      // eslint-disable-next-line no-console
       console.log(`[EnvironmentManager] Base URL: ${getBaseURL()}`);
     } else {
+      // eslint-disable-next-line no-console
       console.warn('[EnvironmentManager] Environment switching is only available in development mode');
     }
   }
@@ -97,16 +100,19 @@ export const isStaging = (): boolean => getEnvironmentInfo().isStaging;
 // Environment-specific logging
 export const envLog = (message: string, data?: any): void => {
   if (isDevelopment() || isStaging()) {
+    // eslint-disable-next-line no-console
     console.log(`[${getEnvironmentInfo().displayName}] ${message}`, data || '');
   }
 };
 
 export const envWarn = (message: string, data?: any): void => {
   if (isDevelopment() || isStaging()) {
+    // eslint-disable-next-line no-console
     console.warn(`[${getEnvironmentInfo().displayName}] ${message}`, data || '');
   }
 };
 
 export const envError = (message: string, error?: any): void => {
+  // eslint-disable-next-line no-console
   console.error(`[${getEnvironmentInfo().displayName}] ${message}`, error || '');
 };

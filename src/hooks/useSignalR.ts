@@ -1,6 +1,10 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { HubConnectionState } from '@microsoft/signalr';
-import signalRService, { type StockAlert, type ProductUpdate, type NotificationMessage } from '../services/signalRService';
+import signalRService, {
+  type StockAlert,
+  type ProductUpdate,
+  type NotificationMessage,
+} from '../services/signalRService';
 import { useAuth } from '../contexts/AuthContext';
 
 // Hook for managing SignalR connection
@@ -21,7 +25,11 @@ export const useSignalRConnection = () => {
     try {
       await signalRService.startConnection();
     } catch (error) {
-      console.error('Failed to connect to SignalR:', error);
+      // Log error in development mode only
+      if (__DEV__) {
+        // eslint-disable-next-line no-console
+        console.error('Failed to connect to SignalR:', error);
+      }
     } finally {
       setIsConnecting(false);
     }
@@ -33,7 +41,8 @@ export const useSignalRConnection = () => {
 
   useEffect(() => {
     // Listen to connection state changes
-    const unsubscribe = signalRService.onConnectionStateChange(setConnectionState);
+    const unsubscribe =
+      signalRService.onConnectionStateChange(setConnectionState);
 
     // Auto-connect when authenticated
     if (isAuthenticated && !connectionAttempted.current) {
@@ -42,7 +51,10 @@ export const useSignalRConnection = () => {
     }
 
     // Auto-disconnect when not authenticated
-    if (!isAuthenticated && connectionState !== HubConnectionState.Disconnected) {
+    if (
+      !isAuthenticated &&
+      connectionState !== HubConnectionState.Disconnected
+    ) {
       disconnect();
       connectionAttempted.current = false;
     }
@@ -68,7 +80,7 @@ export const useProductUpdates = (productId?: string) => {
   const { isConnected } = useSignalRConnection();
 
   useEffect(() => {
-    const unsubscribe = signalRService.onProductUpdate((update) => {
+    const unsubscribe = signalRService.onProductUpdate(update => {
       // If productId is specified, only listen to that product
       if (!productId || update.id === productId) {
         setLatestUpdate(update);
@@ -107,7 +119,7 @@ export const useStockAlerts = () => {
   const [unreadCount, setUnreadCount] = useState(0);
 
   useEffect(() => {
-    const unsubscribe = signalRService.onStockAlert((alert) => {
+    const unsubscribe = signalRService.onStockAlert(alert => {
       setAlerts(prev => {
         const newAlerts = [alert, ...prev];
         // Keep only last 50 alerts
@@ -142,7 +154,7 @@ export const useNotifications = () => {
   const [unreadCount, setUnreadCount] = useState(0);
 
   useEffect(() => {
-    const unsubscribe = signalRService.onNotification((notification) => {
+    const unsubscribe = signalRService.onNotification(notification => {
       setNotifications(prev => {
         const newNotifications = [notification, ...prev];
         // Keep only last 100 notifications

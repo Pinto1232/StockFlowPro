@@ -139,6 +139,27 @@ export interface LoginCredentials {
   password: string;
 }
 
+export interface RegisterData {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phoneNumber?: string;
+  dateOfBirth?: string;
+  password: string;
+  confirmPassword: string;
+}
+
+export interface RegisterResponse {
+  message: string;
+  user: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    role: string;
+  };
+}
+
 export interface ApiResponse<T = any> {
   data: T;
   status: number;
@@ -202,6 +223,11 @@ class ApiService {
   async logout(): Promise<ApiResponse<void>> {
     // Your backend logout endpoint
     return apiClient.post(API_ENDPOINTS.auth.logout);
+  }
+
+  async register(registerData: RegisterData): Promise<ApiResponse<RegisterResponse>> {
+    // User registration endpoint
+    return apiClient.post(API_ENDPOINTS.auth.register, registerData);
   }
 
   // Note: Your backend uses cookie-based auth, so these JWT methods are not needed

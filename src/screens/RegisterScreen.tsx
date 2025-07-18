@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import {
   View,
   Text,
-  TextInput,
   TouchableOpacity,
   StyleSheet,
   Alert,
@@ -12,76 +11,98 @@ import {
   ScrollView,
 } from 'react-native';
 import { useAuth } from '../contexts/AuthContext';
+import { ModernInput } from '../components/forms';
+import { useFormValidation, validationRules } from '../utils/validation';
 import { colors, spacing, typography, borderRadius, shadows } from '../theme';
+import { RegisterData } from '../services/api';
 
 interface RegisterScreenProps {
   onSwitchToLogin: () => void;
 }
 
 export const RegisterScreen: React.FC<RegisterScreenProps> = ({ onSwitchToLogin }) => {
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    password: '',
-    confirmPassword: '',
-  });
   const [isRegistering, setIsRegistering] = useState(false);
-  
-  const { isLoading } = useAuth();
+  const { register, isLoading } = useAuth();
 
-  const handleInputChange = (field: keyof typeof formData, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
-  };
+  // Form validation setup
+  const {
+    formData,
+    errors,
+    handleFieldChange,
+    handleFieldBlur,
+    validateAllFields,
+  } = useFormValidation(
+    {
+      firstName: '',
+      lastName: '',
+      email: '',
+      phoneNumber: '',
+      dateOfBirth: '',
+      password: '',
+      confirmPassword: '',
+    },
+    {
+      firstName: [validationRules.required('First name'), validationRules.name()],
+      lastName: [validationRules.required('Last name'), validationRules.name()],
+      email: [validationRules.required('Email'), validationRules.email()],
+      phoneNumber: [validationRules.phone()], // Optional field
+      dateOfBirth: [validationRules.dateOfBirth()], // Optional field
+      password: [validationRules.required('Password'), validationRules.passwordSimple()],
+      confirmPassword: [validationRules.required('Confirm password')],
+    }
+  );
 
-  const validateForm = () => {
-    const { name, email, password, confirmPassword } = formData;
-    
-    if (!name.trim()) {
-      Alert.alert('Error', 'Please enter your name');
-      return false;
+  // Custom validation for confirm password that depends on current password
+  const validateConfirmPassword = (value: string) => {
+    if (value !== formData.password) {
+      return 'Passwords do not match';
     }
-    
-    if (!email.trim()) {
-      Alert.alert('Error', 'Please enter your email');
-      return false;
-    }
-    
-    if (!email.includes('@')) {
-      Alert.alert('Error', 'Please enter a valid email address');
-      return false;
-    }
-    
-    if (password.length < 6) {
-      Alert.alert('Error', 'Password must be at least 6 characters long');
-      return false;
-    }
-    
-    if (password !== confirmPassword) {
-      Alert.alert('Error', 'Passwords do not match');
-      return false;
-    }
-    
-    return true;
+    return '';
   };
 
   const handleRegister = async () => {
-    if (!validateForm()) return;
+    if (!validateAllFields()) {
+      return;
+    }
 
     setIsRegistering(true);
     
     try {
-      // For now, show a message that registration is not implemented
-      // In a real app, you would call an API to register the user
-      Alert.alert(
-        'Registration Not Available',
-        'User registration is currently handled by administrators. Please contact your system administrator to create an account.',
-        [
-          {
-            text: 'OK',
-            onPress: onSwitchToLogin,
-          },
-        ]
-      );
+      // Prepare registration data
+      const registerData: RegisterData = {
+        firstName: formData.firstName.trim(),
+        lastName: formData.lastName.trim(),
+        email: formData.email.trim().toLowerCase(),
+        phoneNumber: formData.phoneNumber.trim() || undefined,
+        dateOfBirth: formData.dateOfBirth.trim() || undefined,
+        password: formData.password,
+        confirmPassword: formData.confirmPassword,
+      };
+
+      // Call the registration API
+      const result = await register(registerData);
+      
+      if (result.success) {
+        Alert.alert(
+          'Registration Successful',
+          result.message || 'Your account has been created successfully. You can now sign in.',
+          [
+            {
+              text: 'Sign In',
+              onPress: onSwitchToLogin,
+            },
+          ]
+        );
+      } else {
+        // Show error message
+        const errorMessage = result.message || 'Registration failed. Please try again.';
+        const errorDetails = result.errors?.join('\n') || '';
+        
+        Alert.alert(
+          'Registration Failed',
+          errorDetails ? `${errorMessage}\n\n${errorDetails}` : errorMessage
+        );
+      }
     } catch (error) {
       Alert.alert('Error', 'Registration failed. Please try again.');
     } finally {
@@ -90,7 +111,8 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({ onSwitchToLogin 
   };
 
   const isButtonDisabled = isRegistering || isLoading || 
-    !formData.name.trim() || 
+    !formData.firstName.trim() || 
+    !formData.lastName.trim() || 
     !formData.email.trim() || 
     !formData.password.trim() || 
     !formData.confirmPassword.trim();
@@ -120,64 +142,107 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({ onSwitchToLogin 
           </View>
 
           <View style={styles.form}>
-            <View style={styles.inputContainer}>
-              <Text style={styles.label}>Full Name</Text>
-              <TextInput
-                style={styles.input}
-                value={formData.name}
-                onChangeText={(value) => handleInputChange('name', value)}
-                placeholder="Enter your full name"
-                placeholderTextColor={colors.textSecondary}
-                autoCapitalize="words"
-                autoCorrect={false}
-                editable={!isRegistering}
-              />
-            </View>
+            <ModernInput
+              label="First Name"
+              value={formData.firstName}
+              onChangeText={(value) => handleFieldChange('firstName', value)}
+              onBlur={() => handleFieldBlur('firstName')}
+              error={errors.firstName}
+              leftIcon="person-outline"
+              placeholder="Enter your first name"
+              autoCapitalize="words"
+              autoCorrect={false}
+              editable={!isRegistering}
+              required
+            />
 
-            <View style={styles.inputContainer}>
-              <Text style={styles.label}>Email</Text>
-              <TextInput
-                style={styles.input}
-                value={formData.email}
-                onChangeText={(value) => handleInputChange('email', value)}
-                placeholder="Enter your email address"
-                placeholderTextColor={colors.textSecondary}
-                keyboardType="email-address"
-                autoCapitalize="none"
-                autoCorrect={false}
-                editable={!isRegistering}
-              />
-            </View>
+            <ModernInput
+              label="Last Name"
+              value={formData.lastName}
+              onChangeText={(value) => handleFieldChange('lastName', value)}
+              onBlur={() => handleFieldBlur('lastName')}
+              error={errors.lastName}
+              leftIcon="person-outline"
+              placeholder="Enter your last name"
+              autoCapitalize="words"
+              autoCorrect={false}
+              editable={!isRegistering}
+              required
+            />
 
-            <View style={styles.inputContainer}>
-              <Text style={styles.label}>Password</Text>
-              <TextInput
-                style={styles.input}
-                value={formData.password}
-                onChangeText={(value) => handleInputChange('password', value)}
-                placeholder="Enter your password"
-                placeholderTextColor={colors.textSecondary}
-                secureTextEntry
-                autoCapitalize="none"
-                autoCorrect={false}
-                editable={!isRegistering}
-              />
-            </View>
+            <ModernInput
+              label="Email"
+              value={formData.email}
+              onChangeText={(value) => handleFieldChange('email', value)}
+              onBlur={() => handleFieldBlur('email')}
+              error={errors.email}
+              leftIcon="mail-outline"
+              placeholder="Enter your email address"
+              keyboardType="email-address"
+              autoCapitalize="none"
+              autoCorrect={false}
+              editable={!isRegistering}
+              required
+            />
 
-            <View style={styles.inputContainer}>
-              <Text style={styles.label}>Confirm Password</Text>
-              <TextInput
-                style={styles.input}
-                value={formData.confirmPassword}
-                onChangeText={(value) => handleInputChange('confirmPassword', value)}
-                placeholder="Confirm your password"
-                placeholderTextColor={colors.textSecondary}
-                secureTextEntry
-                autoCapitalize="none"
-                autoCorrect={false}
-                editable={!isRegistering}
-              />
-            </View>
+            <ModernInput
+              label="Phone Number"
+              value={formData.phoneNumber}
+              onChangeText={(value) => handleFieldChange('phoneNumber', value)}
+              onBlur={() => handleFieldBlur('phoneNumber')}
+              error={errors.phoneNumber}
+              leftIcon="call-outline"
+              placeholder="Enter your phone number"
+              keyboardType="phone-pad"
+              autoCapitalize="none"
+              autoCorrect={false}
+              editable={!isRegistering}
+              helperText="Optional"
+            />
+
+            <ModernInput
+              label="Date of Birth"
+              value={formData.dateOfBirth}
+              onChangeText={(value) => handleFieldChange('dateOfBirth', value)}
+              onBlur={() => handleFieldBlur('dateOfBirth')}
+              error={errors.dateOfBirth}
+              leftIcon="calendar-outline"
+              placeholder="YYYY-MM-DD"
+              autoCapitalize="none"
+              autoCorrect={false}
+              editable={!isRegistering}
+              helperText="Optional - Format: YYYY-MM-DD"
+            />
+
+            <ModernInput
+              label="Password"
+              value={formData.password}
+              onChangeText={(value) => handleFieldChange('password', value)}
+              onBlur={() => handleFieldBlur('password')}
+              error={errors.password}
+              leftIcon="lock-closed-outline"
+              placeholder="Enter your password"
+              isPassword
+              autoCapitalize="none"
+              autoCorrect={false}
+              editable={!isRegistering}
+              required
+            />
+
+            <ModernInput
+              label="Confirm Password"
+              value={formData.confirmPassword}
+              onChangeText={(value) => handleFieldChange('confirmPassword', value)}
+              onBlur={() => handleFieldBlur('confirmPassword')}
+              error={errors.confirmPassword || validateConfirmPassword(formData.confirmPassword)}
+              leftIcon="lock-closed-outline"
+              placeholder="Confirm your password"
+              isPassword
+              autoCapitalize="none"
+              autoCorrect={false}
+              editable={!isRegistering}
+              required
+            />
 
             <TouchableOpacity
               style={[styles.registerButton, isButtonDisabled && styles.registerButtonDisabled]}
@@ -242,32 +307,13 @@ const styles = StyleSheet.create({
     marginBottom: spacing.sm,
   },
   subtitle: {
-    ...typography.textStyles.body,
+    ...typography.textStyles.bodySmall,
     color: colors.textSecondary,
     textAlign: 'center',
     lineHeight: 22,
   },
   form: {
     marginBottom: spacing.lg,
-  },
-  inputContainer: {
-    marginBottom: spacing.lg,
-  },
-  label: {
-    ...typography.textStyles.subtitle,
-    color: colors.textPrimary,
-    fontWeight: '600',
-    marginBottom: spacing.sm,
-  },
-  input: {
-    backgroundColor: colors.backgroundSecondary,
-    borderWidth: 1,
-    borderColor: colors.borderLight,
-    borderRadius: borderRadius.md,
-    padding: spacing.md,
-    ...typography.textStyles.body,
-    color: colors.textPrimary,
-    fontSize: 16,
   },
   registerButton: {
     backgroundColor: colors.primary,

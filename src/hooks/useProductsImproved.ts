@@ -102,6 +102,7 @@ export const useCreateProduct = () => {
       queryClient.invalidateQueries({ queryKey: productKeys.lists() });
     },
     onError: (error) => {
+      // eslint-disable-next-line no-console
       console.error('Failed to create product:', error);
     },
   });
@@ -120,6 +121,7 @@ export const useUpdateProduct = () => {
       queryClient.invalidateQueries({ queryKey: productKeys.detail(variables.id) });
     },
     onError: (error) => {
+      // eslint-disable-next-line no-console
       console.error('Failed to update product:', error);
     },
   });
@@ -137,6 +139,7 @@ export const useDeleteProduct = () => {
       queryClient.invalidateQueries({ queryKey: productKeys.lists() });
     },
     onError: (error) => {
+      // eslint-disable-next-line no-console
       console.error('Failed to delete product:', error);
     },
   });
@@ -163,6 +166,7 @@ export const useRecordStockMovement = () => {
       queryClient.invalidateQueries({ queryKey: productKeys.all });
     },
     onError: (error) => {
+      // eslint-disable-next-line no-console
       console.error('Failed to record stock movement:', error);
     },
   });

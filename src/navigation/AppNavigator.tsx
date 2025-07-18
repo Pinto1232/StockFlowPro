@@ -1,9 +1,20 @@
 import React from 'react';
-import { Platform, View, ActivityIndicator, Text, StyleSheet } from 'react-native';
+import {
+  Platform,
+  View,
+  ActivityIndicator,
+  Text,
+  StyleSheet,
+} from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { HomeScreen, UserManagementScreen, CounterScreen, SettingsScreen } from '../screens';
-import { CustomTabBar, CustomHeader } from '../components/navigation';
+import {
+  HomeScreen,
+  UserManagementScreen,
+  CounterScreen,
+  SettingsScreen,
+} from '../screens';
+import { CustomTabBar, CustomHeader, UserDropdown } from '../components/navigation';
 import { AuthNavigator } from './AuthNavigator';
 import { useAuth } from '../contexts/AuthContext';
 import { colors, spacing, typography } from '../theme';
@@ -42,9 +53,15 @@ const navigationTheme = {
   },
 };
 
+
 // Screen options for consistent styling
 const getScreenOptions = (title: string) => ({
-  header: () => <CustomHeader title={title} />,
+  header: () => (
+    <CustomHeader 
+      title={title} 
+      rightComponent={<UserDropdown testID="user-dropdown" />} 
+    />
+  ),
   tabBarHideOnKeyboard: true,
 });
 
@@ -52,7 +69,7 @@ const getScreenOptions = (title: string) => ({
 const MainAppTabs: React.FC = () => {
   return (
     <Tab.Navigator
-      tabBar={(props) => <CustomTabBar {...props} />}
+      tabBar={props => <CustomTabBar {...props} />}
       screenOptions={{
         headerShown: true,
         tabBarHideOnKeyboard: Platform.OS === 'android',
@@ -70,22 +87,22 @@ const MainAppTabs: React.FC = () => {
       }}
     >
       <Tab.Screen
-        name="HomeTab"
+        name="Home"
         component={HomeScreen}
         options={getScreenOptions('Home')}
       />
       <Tab.Screen
-        name="UsersTab"
+        name="Users"
         component={UserManagementScreen}
-        options={getScreenOptions('User Management')}
+        options={getScreenOptions('User')}
       />
       <Tab.Screen
-        name="CounterTab"
+        name="Counter"
         component={CounterScreen}
         options={getScreenOptions('Counter')}
       />
       <Tab.Screen
-        name="SettingsTab"
+        name="Settings"
         component={SettingsScreen}
         options={getScreenOptions('Settings')}
       />

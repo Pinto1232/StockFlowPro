@@ -7,10 +7,10 @@ export type RootStackParamList = {
 };
 
 export type BottomTabParamList = {
-  HomeTab: undefined;
-  UsersTab: undefined;
-  CounterTab: undefined;
-  SettingsTab: undefined;
+  Home: undefined;
+  Users: undefined;
+  Counter: undefined;
+  Settings: undefined;
 };
 
 // Screen props types

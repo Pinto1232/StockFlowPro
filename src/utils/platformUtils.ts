@@ -18,6 +18,7 @@ export const safeStopAnimation = (animatedValue: any) => {
   } catch (error) {
     // Silently ignore cleanup errors, especially on web
     if (__DEV__) {
+      // eslint-disable-next-line no-console
       console.warn('Animation cleanup warning:', error);
     }
   }
@@ -33,6 +34,7 @@ export const safeStartAnimation = (animation: any, callback?: (finished: boolean
     }
   } catch (error) {
     if (__DEV__) {
+      // eslint-disable-next-line no-console
       console.warn('Animation start warning:', error);
     }
     // Call callback with false to indicate animation didn't complete
@@ -52,6 +54,7 @@ export const safeClearTimeout = (timeoutId: NodeJS.Timeout | number | null) => {
     }
   } catch (error) {
     if (__DEV__) {
+      // eslint-disable-next-line no-console
       console.warn('Timeout cleanup warning:', error);
     }
   }
@@ -67,6 +70,7 @@ export const safeClearInterval = (intervalId: NodeJS.Timeout | number | null) =>
     }
   } catch (error) {
     if (__DEV__) {
+      // eslint-disable-next-line no-console
       console.warn('Interval cleanup warning:', error);
     }
   }
@@ -82,6 +86,7 @@ export const createSafeCleanup = (cleanupFunctions: (() => void)[]) => {
         cleanup();
       } catch (error) {
         if (__DEV__) {
+          // eslint-disable-next-line no-console
           console.warn('Cleanup function warning:', error);
         }
       }

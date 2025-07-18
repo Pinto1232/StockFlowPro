@@ -56,20 +56,26 @@ export const ConfigTest: React.FC = () => {
 
   const testProductsAPI = async () => {
     try {
+      // eslint-disable-next-line no-console
       console.log('🧪 Testing Products API...');
       const response = await apiService.getProducts({ activeOnly: true });
+      // eslint-disable-next-line no-console
       console.log('📦 Products Response:', response);
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error('❌ Products API Error:', error);
     }
   };
 
   const testDashboardAPI = async () => {
     try {
+      // eslint-disable-next-line no-console
       console.log('🧪 Testing Dashboard API...');
       const response = await apiService.getDashboardStats();
+      // eslint-disable-next-line no-console
       console.log('📊 Dashboard Response:', response);
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error('❌ Dashboard API Error:', error);
     }
   };
