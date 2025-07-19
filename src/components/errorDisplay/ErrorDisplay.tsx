@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { colors, spacing, typography, borderRadius, shadows } from '../theme';
-import { parseError, getErrorSuggestion } from '../utils/errorHandler';
+import { colors, spacing, typography, borderRadius, shadows } from '../../theme';
+import { parseError, getErrorSuggestion } from '../../utils/errorHandler';
 
 interface ErrorDisplayProps {
   error: unknown;

@@ -4,7 +4,7 @@ import { Animated } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AppProvider } from './src/infrastructure/providers/AppProvider';
 import { AppNavigator } from './src/navigation';
-import { SplashScreen } from './src/components/SplashScreen';
+import { SplashScreen } from './src/components/splashScreen';
 
 export default function App() {
   const [showSplash, setShowSplash] = useState(true);
@@ -25,7 +25,6 @@ export default function App() {
           setShowSplash(false);
           appOpacity.setValue(1);
         } else {
-          
           if (!hasLaunchedBefore) {
             await AsyncStorage.setItem('hasLaunchedBefore', 'true');
           }
@@ -34,7 +33,7 @@ export default function App() {
       } catch (error) {
         // eslint-disable-next-line no-console
         console.error('Error checking auth status:', error);
-        
+
         setIsFirstLaunch(true);
       }
     };
@@ -64,14 +63,16 @@ export default function App() {
         try {
           animationRef.current.stop();
         } catch (error) {
-          
+          // eslint-disable-next-line no-console
+          console.warn('Animation stop error:', error);
         }
       }
 
       try {
         appOpacity.stopAnimation();
       } catch (error) {
-        
+        // eslint-disable-next-line no-console
+        console.warn('Animation cleanup error:', error);
       }
     };
   }, [appOpacity]);

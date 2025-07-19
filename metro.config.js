@@ -8,6 +8,11 @@ config.server = {
   port: 8081,
   enhanceMiddleware: (middleware) => {
     return (req, res, next) => {
+      // Set proper MIME types for JavaScript bundles
+      if (req.url && req.url.includes('.bundle')) {
+        res.setHeader('Content-Type', 'application/javascript; charset=utf-8');
+      }
+      
       // Enable CORS for hot reloading
       res.setHeader('Access-Control-Allow-Origin', '*');
       res.setHeader('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
@@ -28,12 +33,19 @@ config.resolver = {
   ...config.resolver,
   unstable_enablePackageExports: true,
   unstable_conditionNames: ['react-native', 'browser', 'require'],
+  platforms: ['ios', 'android', 'native', 'web'],
 };
 
 // Configure transformer for better ES module support
 config.transformer = {
   ...config.transformer,
   unstable_allowRequireContext: true,
+  getTransformOptions: async () => ({
+    transform: {
+      experimentalImportSupport: false,
+      inlineRequires: true,
+    },
+  }),
   minifierConfig: {
     ecma: 8,
     keep_fnames: true,

@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { 
@@ -8,8 +7,8 @@ import {
   apiService,
   mockApiService,
   realApiService 
-} from '../services';
-import { colors, spacing, typography, borderRadius } from '../theme';
+} from '../../services';
+import { colors, spacing, typography, borderRadius } from '../../theme';
 
 export const ConfigTest: React.FC = () => {
   const [configInfo, setConfigInfo] = useState<any>(null);

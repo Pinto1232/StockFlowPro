@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, Animated, Dimensions } from 'react-native';
-import { colors, spacing, typography } from '../theme';
+import { colors, spacing, typography } from '../../theme';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
@@ -185,7 +185,7 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish }) => {
         try {
           animation.stop();
         } catch (error) {
-          
+          // Silently ignore animation stop errors during cleanup
         }
       });
 
@@ -202,7 +202,7 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish }) => {
         circleScale3.stopAnimation();
         progressWidth.stopAnimation();
       } catch (error) {
-        
+        // Silently ignore animation stop errors during cleanup
       }
     };
   }, [onFinish]);

@@ -7,8 +7,8 @@ import {
   ActivityIndicator,
   ScrollView,
 } from 'react-native';
-import { colors, spacing, typography, borderRadius, shadows } from '../theme';
-import { useProductsEnhanced, useProductSourcesHealth } from '../hooks/useProductsEnhanced';
+import { colors, spacing, typography, borderRadius, shadows } from '../../theme';
+import { useProductsEnhanced, useProductSourcesHealth } from '../../hooks/useProductsEnhanced';
 
 interface ProductDataSourceSelectorProps {
   onDataSourceChange?: (source: 'mock' | 'api' | 'both') => void;

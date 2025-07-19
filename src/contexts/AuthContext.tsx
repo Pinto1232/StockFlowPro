@@ -59,15 +59,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           } else {
             
             // eslint-disable-next-line no-console
-            console.warn('[AuthContext] Health check failed, clearing auth data:', response);
-            await clearAuthData();
+            console.warn('[AuthContext] Health check failed, but keeping user session for development:', response);
+            // In development, keep the user logged in even if health check fails
+            setUser(parsedUser);
           }
         } catch (healthError) {
           // eslint-disable-next-line no-console
           console.warn('[AuthContext] Health check failed, but keeping user session for development:', healthError);
 
-          // we'll keep the user logged in to avoid constant re-authentication
-          
+          // In development, we'll keep the user logged in to avoid constant re-authentication
           setUser(parsedUser);
         }
       } catch (error) {

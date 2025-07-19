@@ -8,7 +8,7 @@ import {
   ScrollView,
   Platform,
 } from 'react-native';
-import { colors, spacing, typography, borderRadius, shadows } from '../theme';
+import { colors, spacing, typography, borderRadius, shadows } from '../../theme';
 
 interface ApiConnectionTestProps {
   onTestComplete?: (results: any) => void;

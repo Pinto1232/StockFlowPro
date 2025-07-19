@@ -1,8 +1,7 @@
-
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { colors, spacing, typography, borderRadius } from '../theme';
-import { useApiHealth } from '../hooks/useApiHealth';
+import { colors, spacing, typography, borderRadius } from '../../theme';
+import { useApiHealth } from '../../hooks/useApiHealth';
 
 interface ApiHealthStatusProps {
   

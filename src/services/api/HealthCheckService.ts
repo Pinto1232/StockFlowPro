@@ -1,4 +1,3 @@
-
 import { apiClient } from './ApiClient';
 import { API_ENDPOINTS, getCurrentEnvironment } from '../config';
 
@@ -41,34 +40,31 @@ export class HealthCheckService {
   private getHealthCheckStrategies() {
     return [
       {
+        name: 'products_list',
+        endpoint: API_ENDPOINTS.products.list,
+        description: 'Products list endpoint (expects 401 if healthy)',
+        priority: 1,
+        expectStatus: 401 // 401 means the endpoint exists but requires auth
+      },
+      {
         name: 'dedicated_health',
         endpoint: API_ENDPOINTS.health.basic,
         description: 'Dedicated health endpoint',
-        priority: 1
+        priority: 2,
+        expectStatus: 200
       },
       {
         name: 'version_endpoint',
         endpoint: API_ENDPOINTS.health.version,
         description: 'Version endpoint',
-        priority: 2
-      },
-      {
-        name: 'products_list',
-        endpoint: API_ENDPOINTS.products.list,
-        description: 'Products list endpoint',
-        priority: 3
-      },
-      {
-        name: 'auth_session',
-        endpoint: API_ENDPOINTS.auth.session,
-        description: 'Auth session endpoint',
-        priority: 4
+        priority: 3,
+        expectStatus: 200
       }
     ];
   }
 
   private async performHealthCheck(
-    strategy: { name: string; endpoint: string; description: string },
+    strategy: { name: string; endpoint: string; description: string; expectStatus?: number },
     options: HealthCheckOptions = {}
   ): Promise<HealthCheckResult> {
     const startTime = Date.now();
@@ -114,6 +110,27 @@ export class HealthCheckService {
 
     } catch (error: any) {
       const responseTime = Date.now() - startTime;
+
+      // Check if this is an expected status (like 401 for auth-required endpoints)
+      if (strategy.expectStatus && error.status === strategy.expectStatus) {
+        const result: HealthCheckResult = {
+          isHealthy: true,
+          status: 'healthy',
+          timestamp,
+          responseTime,
+          endpoint: strategy.endpoint,
+          strategy: strategy.name,
+          details: includeDetails ? {
+            statusCode: error.status,
+            message: `${strategy.description} - Expected status ${strategy.expectStatus} received`
+          } : undefined
+        };
+
+        // eslint-disable-next-line no-console
+        console.log(`[HealthCheck] Success with strategy: ${strategy.name} (expected ${strategy.expectStatus}, ${responseTime}ms)`);
+
+        return result;
+      }
 
       const result: HealthCheckResult = {
         isHealthy: false,

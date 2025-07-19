@@ -21,8 +21,8 @@ import {
 } from 'react-native';
 import { colors, spacing, typography, borderRadius, shadows } from '../theme';
 import { ParallaxHero } from '../components/parallax';
-import { ErrorBoundary } from '../components/ErrorBoundary';
-import { ProductCard } from '../components/ProductCard';
+import { ErrorBoundary } from '../components/errorBoundary';
+import { ProductCard } from '../components/productCard';
 import { useProductsEnhanced } from '../hooks/useProductsEnhanced';
 import { safeStopAnimation, debounce } from '../utils/platformUtils';
 
@@ -32,7 +32,6 @@ const INITIAL_PRODUCTS_COUNT = 2;
 const PRODUCTS_PER_LOAD = 2;
 
 const HomeScreenComponent: React.FC = () => {
-  
   const mountedRef = useRef(true);
   const componentIdRef = useRef(Math.random().toString(36).substr(2, 9));
   const cleanupExecutedRef = useRef(false);
@@ -107,7 +106,6 @@ const HomeScreenComponent: React.FC = () => {
       activeAnimationsRef.current.add(animation);
 
       const wrappedCallback = (result: any) => {
-        
         activeAnimationsRef.current.delete(animation);
 
         if (mountedRef.current && !cleanupExecutedRef.current && callback) {
@@ -170,7 +168,7 @@ const HomeScreenComponent: React.FC = () => {
     ? {
         success: enhancedData.success,
         message: enhancedData.message,
-        data: enhancedData.data.products, 
+        data: enhancedData.data.products,
         total: enhancedData.data.total,
         page: enhancedData.data.page,
         totalPages: enhancedData.data.totalPages,
@@ -211,7 +209,7 @@ const HomeScreenComponent: React.FC = () => {
     (event: any) => {
       const { contentOffset, contentSize, layoutMeasurement } =
         event.nativeEvent;
-      const paddingToBottom = 100; 
+      const paddingToBottom = 100;
 
       if (
         contentOffset.y + layoutMeasurement.height + paddingToBottom >=
@@ -468,7 +466,6 @@ const HomeScreenComponent: React.FC = () => {
 
   useLayoutEffect(() => {
     return () => {
-      
       mountedRef.current = false;
 
       if (cleanupExecutedRef.current) return;
@@ -484,7 +481,7 @@ const HomeScreenComponent: React.FC = () => {
         try {
           animation.stop();
         } catch (error) {
-          
+          // eslint-disable-next-line no-console
         }
       });
       activeAnimationsRef.current.clear();
@@ -494,7 +491,7 @@ const HomeScreenComponent: React.FC = () => {
         try {
           clearInterval(interval);
         } catch (error) {
-          
+          // eslint-disable-next-line no-console
         }
       });
       activeIntervalsRef.current.clear();
@@ -504,7 +501,7 @@ const HomeScreenComponent: React.FC = () => {
         try {
           callback();
         } catch (error) {
-          
+          // eslint-disable-next-line no-console
         }
       });
       animationCallbacksRef.current.clear();
@@ -520,7 +517,8 @@ const HomeScreenComponent: React.FC = () => {
         try {
           safeStopAnimation(animatedValue);
         } catch (error) {
-          
+          // eslint-disable-next-line no-console
+          console.log('animation error', error);
         }
       });
 
@@ -880,7 +878,6 @@ const HomeScreenComponent: React.FC = () => {
                             ]}
                             onPress={() => {
                               closeModal();
-                              
                             }}
                           >
                             <Text style={styles.primaryButtonText}>
@@ -1034,14 +1031,14 @@ const styles = StyleSheet.create({
     color: colors.primary,
     fontWeight: '600',
   },
-    noDataText: {
+  noDataText: {
     ...typography.textStyles.body,
     color: colors.textSecondary,
     textAlign: 'center',
     fontStyle: 'italic',
     paddingVertical: spacing.xl,
   },
-  
+
   loadMoreContainer: {
     marginTop: spacing.md,
     alignItems: 'center',

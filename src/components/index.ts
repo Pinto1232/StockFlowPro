@@ -1,5 +1,3 @@
-export { SplashScreen } from './SplashScreen';
-export { ConfigTest } from './ConfigTest';
 export * from './common';
 export * from './user';
 export * from './navigation';
